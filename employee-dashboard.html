@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Dashboard - Museum Ticket Booking System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+        .booking-card {
+            transition: all 0.3s ease;
+        }
+        .booking-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+        }
+        .status-badge {
+            transition: all 0.2s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Mobile Menu Toggle -->
+    <button id="mobileMenuToggle" class="md:hidden fixed top-4 left-4 z-50 bg-blue-600 text-white p-2 rounded-lg">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar w-64 bg-white shadow-lg fixed md:relative h-full z-40">
+            <div class="flex flex-col h-full">
+                <!-- Logo -->
+                <div class="flex items-center justify-center h-16 bg-blue-600">
+                    <i class="fas fa-museum text-white text-2xl"></i>
+                    <span class="ml-3 text-white font-bold">Museum Booking</span>
+                </div>
+                
+                <!-- User Info -->
+                <div class="p-4 border-b">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-id-badge text-white"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900" id="userName">Loading...</p>
+                            <p class="text-xs text-gray-500" id="userId">ID: Loading...</p>
+                            <p class="text-xs text-gray-500">Employee</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <nav class="flex-1 px-4 py-6 space-y-2">
+                    <a href="employee-dashboard.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-blue-50 text-blue-700">
+                        <i class="fas fa-tachometer-alt mr-3"></i>
+                        Dashboard
+                    </a>
+                    <a href="#" onclick="showAllBookings()" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-ticket-alt mr-3"></i>
+                        All Bookings
+                    </a>
+                    <a href="#" onclick="showTodayBookings()" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-calendar-day mr-3"></i>
+                        Today's Bookings
+                    </a>
+                    <a href="#" onclick="showCancelledBookings()" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-times-circle mr-3"></i>
+                        Cancelled Bookings
+                    </a>
+                    <a href="#" onclick="showProfile()" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-user-cog mr-3"></i>
+                        Profile
+                    </a>
+                </nav>
+                
+                <!-- Logout -->
+                <div class="p-4 border-t">
+                    <button onclick="logout()" class="w-full flex items-center px-4 py-2 text-sm font-medium rounded-lg text-red-600 hover:bg-red-50">
+                        <i class="fas fa-sign-out-alt mr-3"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 md:ml-64 overflow-y-auto">
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm">
+                <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-center justify-between">
+                        <h1 class="text-2xl font-bold text-gray-900">Employee Dashboard</h1>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-sm text-gray-600">
+                                <i class="fas fa-calendar mr-2"></i>
+                                <span id="currentDate"></span>
+                            </span>
+                            <button onclick="refreshData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                <i class="fas fa-sync-alt mr-2"></i>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-blue-100 rounded-full">
+                                <i class="fas fa-ticket-alt text-blue-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Total Bookings</p>
+                                <p class="text-2xl font-bold text-gray-900" id="totalBookings">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-green-100 rounded-full">
+                                <i class="fas fa-calendar-check text-green-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Today's Bookings</p>
+                                <p class="text-2xl font-bold text-gray-900" id="todayBookings">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-yellow-100 rounded-full">
+                                <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Pending</p>
+                                <p class="text-2xl font-bold text-gray-900" id="pendingBookings">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-red-100 rounded-full">
+                                <i class="fas fa-times-circle text-red-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Cancelled</p>
+                                <p class="text-2xl font-bold text-gray-900" id="cancelledBookings">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Controls -->
+                <div class="bg-white rounded-lg shadow p-6 mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-bold text-gray-900">Booking Management</h3>
+                        <div class="flex space-x-4">
+                            <button onclick="showAllBookings()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                <i class="fas fa-list mr-2"></i>
+                                All Bookings
+                            </button>
+                            <button onclick="showTodayBookings()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                                <i class="fas fa-calendar-day mr-2"></i>
+                                Today
+                            </button>
+                            <button onclick="showCancelledBookings()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                                <i class="fas fa-times-circle mr-2"></i>
+                                Cancelled
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Date Filter -->
+                    <div class="flex items-center space-x-4">
+                        <label class="text-sm font-medium text-gray-700">Filter by Date:</label>
+                        <input type="date" id="dateFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <button onclick="filterByDate()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                            <i class="fas fa-filter mr-2"></i>
+                            Apply Filter
+                        </button>
+                        <button onclick="clearFilter()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                            <i class="fas fa-times mr-2"></i>
+                            Clear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bookings List -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-bold text-gray-900" id="bookingsTitle">All Bookings</h3>
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="searchInput" placeholder="Search by booking ID or name..." class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <button onclick="searchBookings()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="bookingsList" class="space-y-4">
+                        <!-- Bookings will be loaded here -->
+                    </div>
+                    
+                    <div id="noBookings" class="text-center py-8 hidden">
+                        <i class="fas fa-calendar-times text-6xl text-gray-300 mb-4"></i>
+                        <h4 class="text-lg font-medium text-gray-600 mb-2">No bookings found</h4>
+                        <p class="text-gray-500">Try adjusting your filters or search criteria.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Manage Booking Modal -->
+    <div id="manageModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-2xl mx-4 max-h-screen overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-900">Manage Booking</h3>
+                <button onclick="closeManageModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="manageContent">
+                <!-- Booking details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const userName = document.getElementById('userName');
+        const currentDate = document.getElementById('currentDate');
+        const totalBookings = document.getElementById('totalBookings');
+        const todayBookings = document.getElementById('todayBookings');
+        const pendingBookings = document.getElementById('pendingBookings');
+        const cancelledBookings = document.getElementById('cancelledBookings');
+        const bookingsList = document.getElementById('bookingsList');
+        const noBookings = document.getElementById('noBookings');
+        const bookingsTitle = document.getElementById('bookingsTitle');
+        const dateFilter = document.getElementById('dateFilter');
+        const searchInput = document.getElementById('searchInput');
+        const manageModal = document.getElementById('manageModal');
+        const manageContent = document.getElementById('manageContent');
+
+        // Sample booking data
+        let allBookings = [
+            {
+                id: 'BK001',
+                customerName: 'John Doe',
+                customerEmail: 'john@example.com',
+                ticketType: 'Adult General Admission',
+                visitDate: '2026-03-15',
+                visitTime: '10:00',
+                ticketCount: 2,
+                totalPrice: 40,
+                status: 'confirmed',
+                bookingDate: '2026-03-10',
+                phoneNumber: '+1234567890'
+            },
+            {
+                id: 'BK002',
+                customerName: 'Jane Smith',
+                customerEmail: 'jane@example.com',
+                ticketType: 'Family Package',
+                visitDate: '2026-03-15',
+                visitTime: '14:00',
+                ticketCount: 5,
+                totalPrice: 50,
+                status: 'pending',
+                bookingDate: '2026-03-11',
+                phoneNumber: '+1234567891'
+            },
+            {
+                id: 'BK003',
+                customerName: 'Bob Johnson',
+                customerEmail: 'bob@example.com',
+                ticketType: 'Child Ticket',
+                visitDate: '2026-03-14',
+                visitTime: '11:00',
+                ticketCount: 1,
+                totalPrice: 10,
+                status: 'cancelled',
+                bookingDate: '2026-03-09',
+                phoneNumber: '+1234567892'
+            }
+        ];
+
+        // Currency configuration
+        const currency = {
+            symbol: '₹',
+            code: 'INR',
+            rate: 83.50 // 1 USD = 83.50 INR
+        };
+
+        let currentFilter = 'all';
+        let filteredBookings = [...allBookings];
+
+        // Initialize
+        window.addEventListener('load', function() {
+            checkAuth();
+            loadAllBookings();
+            updateUserInfo();
+            updateCurrentDate();
+            updateStats();
+            displayBookings();
+        });
+
+        // Real-time updates when bookings change from other tabs/windows
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'museumBookings') {
+                loadAllBookings();
+                filteredBookings = [...allBookings];
+                updateStats();
+                displayBookings();
+            }
+        });
+
+        // Check authentication
+        function checkAuth() {
+            const user = localStorage.getItem('user');
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            
+            if (!user || !isLoggedIn) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const userData = JSON.parse(user);
+            if (userData.role !== 'employee') {
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Update user info
+        function updateUserInfo() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            userName.textContent = user.name || 'Employee';
+            document.getElementById('userId').textContent = `ID: ${user.id || 'N/A'}`;
+        }
+
+        function loadAllBookings() {
+            const storedBookings = JSON.parse(localStorage.getItem('museumBookings') || 'null');
+            allBookings = Array.isArray(storedBookings) ? storedBookings : allBookings;
+            if (!storedBookings) {
+                localStorage.setItem('museumBookings', JSON.stringify(allBookings));
+            }
+        }
+
+        function saveAllBookings() {
+            localStorage.setItem('museumBookings', JSON.stringify(allBookings));
+        }
+
+        // Update current date
+        function updateCurrentDate() {
+            const today = new Date();
+            currentDate.textContent = today.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+
+        // Update statistics
+        function updateStats() {
+            const today = new Date().toISOString().split('T')[0];
+            
+            totalBookings.textContent = allBookings.length;
+            todayBookings.textContent = allBookings.filter(b => b.visitDate === today).length;
+            pendingBookings.textContent = allBookings.filter(b => b.status === 'pending').length;
+            cancelledBookings.textContent = allBookings.filter(b => b.status === 'cancelled').length;
+        }
+
+        // Mobile menu toggle
+        mobileMenuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('hidden');
+        });
+
+        // Display bookings
+        function displayBookings() {
+            if (filteredBookings.length === 0) {
+                bookingsList.classList.add('hidden');
+                noBookings.classList.remove('hidden');
+                return;
+            }
+
+            bookingsList.classList.remove('hidden');
+            noBookings.classList.add('hidden');
+
+            bookingsList.innerHTML = filteredBookings.map(booking => {
+                const statusColors = {
+                    confirmed: 'bg-green-100 text-green-800',
+                    pending: 'bg-yellow-100 text-yellow-800',
+                    cancelled: 'bg-red-100 text-red-800'
+                };
+
+                const statusIcons = {
+                    confirmed: 'fa-check-circle',
+                    pending: 'fa-clock',
+                    cancelled: 'fa-times-circle'
+                };
+
+                const totalPriceINR = booking.totalPrice * currency.rate;
+
+                return `
+                    <div class="booking-card bg-white border rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900">${booking.customerName}</h4>
+                                <p class="text-sm text-gray-600">Booking ID: ${booking.id}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-2xl font-bold text-blue-600">${currency.symbol}${totalPriceINR.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <p class="text-sm text-gray-600">Email</p>
+                                <p class="font-medium">${booking.customerEmail}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Phone</p>
+                                <p class="font-medium">${booking.phoneNumber}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Ticket Type</p>
+                                <p class="font-medium">${booking.ticketType}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Visit Date</p>
+                                <p class="font-medium">${new Date(booking.visitDate).toLocaleDateString()}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Visit Time</p>
+                                <p class="font-medium">${booking.visitTime}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Tickets</p>
+                                <p class="font-medium">${booking.ticketCount}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <span class="status-badge inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusColors[booking.status]}">
+                                    <i class="fas ${statusIcons[booking.status]} mr-2"></i>
+                                    ${booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                                </span>
+                                <span class="text-sm text-gray-600">
+                                    <i class="fas fa-calendar-plus mr-2"></i>
+                                    Booked: ${new Date(booking.bookingDate).toLocaleDateString()}
+                                </span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="manageBooking('${booking.id}')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                                    <i class="fas fa-eye mr-1"></i>
+                                    View
+                                </button>
+                                ${booking.status === 'pending' ? `
+                                    <button onclick="confirmBooking('${booking.id}')" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
+                                        <i class="fas fa-check mr-1"></i>
+                                        Confirm
+                                    </button>
+                                ` : ''}
+                                ${booking.status === 'confirmed' ? `
+                                    <button onclick="cancelBooking('${booking.id}')" class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">
+                                        <i class="fas fa-times mr-1"></i>
+                                        Cancel
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Show all bookings
+        function showAllBookings() {
+            currentFilter = 'all';
+            filteredBookings = [...allBookings];
+            bookingsTitle.textContent = 'All Bookings';
+            displayBookings();
+        }
+
+        // Show today's bookings
+        function showTodayBookings() {
+            const today = new Date().toISOString().split('T')[0];
+            currentFilter = 'today';
+            filteredBookings = allBookings.filter(b => b.visitDate === today);
+            bookingsTitle.textContent = "Today's Bookings";
+            displayBookings();
+        }
+
+        // Show cancelled bookings
+        function showCancelledBookings() {
+            currentFilter = 'cancelled';
+            filteredBookings = allBookings.filter(b => b.status === 'cancelled');
+            bookingsTitle.textContent = 'Cancelled Bookings';
+            displayBookings();
+        }
+
+        // Filter by date
+        function filterByDate() {
+            const selectedDate = dateFilter.value;
+            if (!selectedDate) {
+                showAllBookings();
+                return;
+            }
+            
+            currentFilter = 'date';
+            filteredBookings = allBookings.filter(b => b.visitDate === selectedDate);
+            bookingsTitle.textContent = `Bookings for ${new Date(selectedDate).toLocaleDateString()}`;
+            displayBookings();
+        }
+
+        // Clear filter
+        function clearFilter() {
+            dateFilter.value = '';
+            searchInput.value = '';
+            showAllBookings();
+        }
+
+        // Search bookings
+        function searchBookings() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            if (!searchTerm) {
+                displayBookings();
+                return;
+            }
+
+            filteredBookings = allBookings.filter(booking => 
+                booking.id.toLowerCase().includes(searchTerm) ||
+                booking.customerName.toLowerCase().includes(searchTerm) ||
+                booking.customerEmail.toLowerCase().includes(searchTerm)
+            );
+            displayBookings();
+        }
+
+        // Manage booking
+        function manageBooking(bookingId) {
+            const booking = allBookings.find(b => b.id === bookingId);
+            if (!booking) return;
+
+            manageContent.innerHTML = `
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">Customer Information</h4>
+                            <div class="space-y-2">
+                                <p><span class="text-gray-600">Name:</span> <span class="font-medium">${booking.customerName}</span></p>
+                                <p><span class="text-gray-600">Email:</span> <span class="font-medium">${booking.customerEmail}</span></p>
+                                <p><span class="text-gray-600">Phone:</span> <span class="font-medium">${booking.phoneNumber}</span></p>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">Booking Details</h4>
+                            <div class="space-y-2">
+                                <p><span class="text-gray-600">Booking ID:</span> <span class="font-medium">${booking.id}</span></p>
+                                <p><span class="text-gray-600">Ticket Type:</span> <span class="font-medium">${booking.ticketType}</span></p>
+                                <p><span class="text-gray-600">Visit Date:</span> <span class="font-medium">${new Date(booking.visitDate).toLocaleDateString()}</span></p>
+                                <p><span class="text-gray-600">Visit Time:</span> <span class="font-medium">${booking.visitTime}</span></p>
+                                <p><span class="text-gray-600">Number of Tickets:</span> <span class="font-medium">${booking.ticketCount}</span></p>
+                                <p><span class="text-gray-600">Total Price:</span> <span class="font-medium text-blue-600">$${booking.totalPrice}</span></p>
+                                <p><span class="text-gray-600">Status:</span> <span class="font-medium">${booking.status}</span></p>
+                                <p><span class="text-gray-600">Booking Date:</span> <span class="font-medium">${new Date(booking.bookingDate).toLocaleDateString()}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button onclick="closeManageModal()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                            Close
+                        </button>
+                        ${booking.status === 'pending' ? `
+                            <button onclick="confirmBooking('${booking.id}')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                                <i class="fas fa-check mr-2"></i>
+                                Confirm Booking
+                            </button>
+                        ` : ''}
+                        ${booking.status === 'confirmed' ? `
+                            <button onclick="cancelBooking('${booking.id}')" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                                <i class="fas fa-times mr-2"></i>
+                                Cancel Booking
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+
+            manageModal.classList.remove('hidden');
+            manageModal.classList.add('flex');
+        }
+
+        // Close manage modal
+        function closeManageModal() {
+            manageModal.classList.add('hidden');
+            manageModal.classList.remove('flex');
+        }
+
+        // Confirm booking
+        function confirmBooking(bookingId) {
+            if (confirm('Are you sure you want to confirm this booking?')) {
+                const booking = allBookings.find(b => b.id === bookingId);
+                if (booking) {
+                    booking.status = 'confirmed';
+                    saveAllBookings();
+                    filteredBookings = [...allBookings];
+                    displayBookings();
+                    updateStats();
+                    closeManageModal();
+                    alert('Booking confirmed successfully!');
+                }
+            }
+        }
+
+        // Cancel booking
+        function cancelBooking(bookingId) {
+            if (confirm('Are you sure you want to cancel this booking?')) {
+                const booking = allBookings.find(b => b.id === bookingId);
+                if (booking) {
+                    booking.status = 'cancelled';
+                    saveAllBookings();
+                    filteredBookings = [...allBookings];
+                    displayBookings();
+                    updateStats();
+                    closeManageModal();
+                    alert('Booking cancelled successfully!');
+                }
+            }
+        }
+
+        // Refresh data
+        function refreshData() {
+            updateCurrentDate();
+            updateStats();
+            displayBookings();
+        }
+
+        // Show profile
+        function showProfile() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            alert(`Employee Profile:\n\nName: ${user.name}\nEmail: ${user.email}\nID: ${user.id}\nRole: ${user.role}\nDepartment: Museum Staff`);
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('isLoggedIn');
+            window.location.href = 'login.html';
+        }
+
+        // Handle search input
+        searchInput.addEventListener('input', function() {
+            searchBookings();
+        });
+    </script>
+</body>
+</html>

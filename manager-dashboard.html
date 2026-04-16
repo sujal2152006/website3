@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Dashboard - Museum Ticket Booking System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+        .booking-card {
+            transition: all 0.3s ease;
+        }
+        .booking-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+        }
+        .status-badge {
+            transition: all 0.2s ease;
+        }
+        .calendar-day {
+            transition: all 0.2s ease;
+        }
+        .calendar-day:hover {
+            background-color: #f3f4f6;
+        }
+        .calendar-day.booked {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        .calendar-day.selected {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .calendar-day.disabled {
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Mobile Menu Toggle -->
+    <button id="mobileMenuToggle" class="md:hidden fixed top-4 left-4 z-50 bg-blue-600 text-white p-2 rounded-lg">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar w-64 bg-white shadow-lg fixed md:relative h-full z-40">
+            <div class="flex flex-col h-full">
+                <!-- Logo -->
+                <div class="flex items-center justify-center h-16 bg-blue-600">
+                    <i class="fas fa-museum text-white text-2xl"></i>
+                    <span class="ml-3 text-white font-bold">Museum Booking</span>
+                </div>
+                
+                <!-- User Info -->
+                <div class="p-4 border-b">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user-tie text-white"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900" id="userName">Loading...</p>
+                            <p class="text-xs text-gray-500" id="userId">ID: Loading...</p>
+                            <p class="text-xs text-gray-500">Manager</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <nav class="flex-1 px-4 py-6 space-y-2">
+                    <a href="manager-dashboard.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-blue-50 text-blue-700">
+                        <i class="fas fa-tachometer-alt mr-3"></i>
+                        Dashboard
+                    </a>
+                    <a href="#" onclick="showAllBookings()" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-ticket-alt mr-3"></i>
+                        All Bookings
+                    </a>
+                    <a href="#" onclick="showCalendar()" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-calendar-alt mr-3"></i>
+                        Calendar View
+                    </a>
+                    <a href="#" onclick="showBookingStats()" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-chart-bar mr-3"></i>
+                        Statistics
+                    </a>
+                    <a href="#" onclick="showManageEmployees()" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-users mr-3"></i>
+                        Manage Employees
+                    </a>
+                    <a href="#" onclick="showViewCredentials()" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-key mr-3"></i>
+                        View Credentials
+                    </a>
+                    <a href="#" onclick="showExportData()" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-download mr-3"></i>
+                        Export Data
+                    </a>
+                    <a href="#" onclick="showProfile()" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-user-cog mr-3"></i>
+                        Profile
+                    </a>
+                </nav>
+                
+                <!-- Logout -->
+                <div class="p-4 border-t">
+                    <button onclick="logout()" class="w-full flex items-center px-4 py-2 text-sm font-medium rounded-lg text-red-600 hover:bg-red-50">
+                        <i class="fas fa-sign-out-alt mr-3"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 md:ml-64 overflow-y-auto">
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm">
+                <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-center justify-between">
+                        <h1 class="text-2xl font-bold text-gray-900">Manager Dashboard</h1>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-sm text-gray-600">
+                                <i class="fas fa-calendar mr-2"></i>
+                                <span id="currentDate"></span>
+                            </span>
+                            <button onclick="refreshData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                <i class="fas fa-sync-alt mr-2"></i>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-blue-100 rounded-full">
+                                <i class="fas fa-ticket-alt text-blue-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Total Bookings</p>
+                                <p class="text-2xl font-bold text-gray-900" id="totalBookings">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-green-100 rounded-full">
+                                <i class="fas fa-calendar-check text-green-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Today's Bookings</p>
+                                <p class="text-2xl font-bold text-gray-900" id="todayBookings">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-yellow-100 rounded-full">
+                                <i class="fas fa-dollar-sign text-yellow-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Today's Revenue</p>
+                                <p class="text-2xl font-bold text-gray-900" id="todayRevenue">$0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-purple-100 rounded-full">
+                                <i class="fas fa-users text-purple-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Total Customers</p>
+                                <p class="text-2xl font-bold text-gray-900" id="totalCustomers">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendar View Section -->
+                <div id="calendarSection" class="bg-white rounded-lg shadow p-6 mb-8 hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-bold text-gray-900">Booking Calendar</h3>
+                        <div class="flex items-center space-x-4">
+                            <button onclick="previousMonth()" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span id="currentMonth" class="font-semibold text-gray-900"></span>
+                            <button onclick="nextMonth()" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-7 gap-2 mb-2">
+                        <div class="text-center font-semibold text-gray-700 py-2">Sun</div>
+                        <div class="text-center font-semibold text-gray-700 py-2">Mon</div>
+                        <div class="text-center font-semibold text-gray-700 py-2">Tue</div>
+                        <div class="text-center font-semibold text-gray-700 py-2">Wed</div>
+                        <div class="text-center font-semibold text-gray-700 py-2">Thu</div>
+                        <div class="text-center font-semibold text-gray-700 py-2">Fri</div>
+                        <div class="text-center font-semibold text-gray-700 py-2">Sat</div>
+                    </div>
+                    
+                    <div id="calendarGrid" class="grid grid-cols-7 gap-2">
+                        <!-- Calendar days will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Bookings Management Section -->
+                <div id="bookingsSection" class="bg-white rounded-lg shadow p-6 mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-bold text-gray-900" id="bookingsTitle">All Bookings</h3>
+                        <div class="flex space-x-4">
+                            <button onclick="showAllBookings()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                <i class="fas fa-list mr-2"></i>
+                                All Bookings
+                            </button>
+                            <button onclick="showTodayBookings()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                                <i class="fas fa-calendar-day mr-2"></i>
+                                Today
+                            </button>
+                            <button onclick="showCalendar()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                                <i class="fas fa-calendar-alt mr-2"></i>
+                                Calendar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Filter Controls -->
+                    <div class="flex items-center space-x-4 mb-6">
+                        <input type="date" id="dateFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="searchInput" placeholder="Search by booking ID or customer name..." class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <select id="statusFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Status</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="pending">Pending</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                        <button onclick="applyFilters()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-filter mr-2"></i>
+                            Apply Filters
+                        </button>
+                        <button onclick="clearFilters()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                            <i class="fas fa-times mr-2"></i>
+                            Clear
+                        </button>
+                    </div>
+                    
+                    <div id="bookingsList" class="space-y-4">
+                        <!-- Bookings will be loaded here -->
+                    </div>
+                    
+                    <div id="noBookings" class="text-center py-8 hidden">
+                        <i class="fas fa-calendar-times text-6xl text-gray-300 mb-4"></i>
+                        <h4 class="text-lg font-medium text-gray-600 mb-2">No bookings found</h4>
+                        <p class="text-gray-500">Try adjusting your filters or search criteria.</p>
+                    </div>
+                </div>
+
+                <!-- Manage Employees Section -->
+                <div id="manageEmployeesSection" class="bg-white rounded-lg shadow p-6 hidden">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">Manage Employee Logins</h3>
+                            <p class="text-sm text-gray-600 max-w-2xl">
+                                Add or update up to 3 employee login records. Employees may login with their ID or email, but only the manager can change these credentials.
+                            </p>
+                        </div>
+                        <button onclick="saveEmployeeSettings()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                            <i class="fas fa-save mr-2"></i>
+                            Save Employee Settings
+                        </button>
+                    </div>
+                    <div id="employeeFormList" class="space-y-4"></div>
+                    <div id="manageEmployeesMessage" class="hidden mt-4 p-4 rounded-lg text-sm"></div>
+                </div>
+
+                <!-- View Credentials Section -->
+                <div id="viewCredentialsSection" class="bg-white rounded-lg shadow p-6 hidden">
+                    <h3 class="text-lg font-bold text-gray-900 mb-6">System Credentials</h3>
+                    <div class="space-y-6">
+                        <!-- Manager Credentials -->
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-4">Manager Credentials</h4>
+                            <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-600">Email:</span>
+                                        <span class="text-sm font-mono text-purple-600">manager@museum.com</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-600">ID:</span>
+                                        <span class="text-sm font-mono text-purple-600">MGR001</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-600">Password:</span>
+                                        <span class="text-sm font-mono text-purple-600">manager123</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Employee Credentials -->
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-4">Employee Credentials</h4>
+                            <div id="employeeCredentialsList" class="space-y-4">
+                                <!-- Employee credentials will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Section -->
+                <div id="statsSection" class="bg-white rounded-lg shadow p-6 hidden">
+                    <h3 class="text-lg font-bold text-gray-900 mb-6">Booking Statistics</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-4">Revenue Overview</h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Today's Revenue:</span>
+                                    <span class="font-semibold text-green-600" id="todayRevenueStat">$0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Week's Revenue:</span>
+                                    <span class="font-semibold text-blue-600" id="weekRevenue">$0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Month's Revenue:</span>
+                                    <span class="font-semibold text-purple-600" id="monthRevenue">$0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-4">Booking Trends</h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Most Popular Ticket:</span>
+                                    <span class="font-semibold" id="popularTicket">Adult General</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Average Booking Value:</span>
+                                    <span class="font-semibold" id="avgBookingValue">$0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Peak Booking Time:</span>
+                                    <span class="font-semibold" id="peakTime">10:00 AM</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Export Data Section -->
+    <div id="exportDataSection" class="bg-white rounded-lg shadow p-6 hidden">
+        <!-- Export content will be loaded here -->
+    </div>
+
+    <!-- Edit Booking Modal -->
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-2xl mx-4 max-h-screen overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-900">Edit Booking</h3>
+                <button onclick="closeEditModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="editContent">
+                <!-- Edit form will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const userName = document.getElementById('userName');
+        const currentDate = document.getElementById('currentDate');
+        const totalBookings = document.getElementById('totalBookings');
+        const todayBookings = document.getElementById('todayBookings');
+        const todayRevenue = document.getElementById('todayRevenue');
+        const totalCustomers = document.getElementById('totalCustomers');
+        const calendarSection = document.getElementById('calendarSection');
+        const bookingsSection = document.getElementById('bookingsSection');
+        const statsSection = document.getElementById('statsSection');
+        const manageEmployeesSection = document.getElementById('manageEmployeesSection');
+        const employeeFormList = document.getElementById('employeeFormList');
+        const manageEmployeesMessage = document.getElementById('manageEmployeesMessage');
+        const viewCredentialsSection = document.getElementById('viewCredentialsSection');
+        const employeeCredentialsList = document.getElementById('employeeCredentialsList');
+        const exportDataSection = document.getElementById('exportDataSection');
+        const currentMonth = document.getElementById('currentMonth');
+        const calendarGrid = document.getElementById('calendarGrid');
+        const bookingsList = document.getElementById('bookingsList');
+        const noBookings = document.getElementById('noBookings');
+        const bookingsTitle = document.getElementById('bookingsTitle');
+        const dateFilter = document.getElementById('dateFilter');
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const editModal = document.getElementById('editModal');
+        const editContent = document.getElementById('editContent');
+
+        // Load bookings from shared storage
+        function loadAllBookings() {
+            const storedBookings = JSON.parse(localStorage.getItem('museumBookings') || 'null');
+            allBookings = Array.isArray(storedBookings) ? storedBookings : [];
+            if (!storedBookings) {
+                localStorage.setItem('museumBookings', JSON.stringify(allBookings));
+            }
+        }
+
+        function saveAllBookings() {
+            localStorage.setItem('museumBookings', JSON.stringify(allBookings));
+        }
+
+        function loadManageEmployees() {
+            const storedEmployees = JSON.parse(localStorage.getItem('managedEmployees') || 'null');
+            if (Array.isArray(storedEmployees) && storedEmployees.length === maxEmployeeRecords) {
+                managedEmployees = storedEmployees;
+            } else {
+                managedEmployees = [
+                    { name: 'Alice Employee', email: 'employee1@museum.com', id: 'EMP001', password: 'employee123' },
+                    { name: 'Bob Employee', email: 'employee2@museum.com', id: 'EMP002', password: 'employee123' },
+                    { name: 'Carol Employee', email: 'employee3@museum.com', id: 'EMP003', password: 'employee123' }
+                ];
+                localStorage.setItem('managedEmployees', JSON.stringify(managedEmployees));
+            }
+            renderManageEmployees();
+        }
+
+        function renderManageEmployees() {
+            employeeFormList.innerHTML = managedEmployees.map((employee, index) => `
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="font-semibold text-gray-900">Employee ${index + 1}</h4>
+                        <span class="text-xs text-gray-500">Login with ID or email</span>
+                    </div>
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Employee Name</label>
+                            <input id="employeeName_${index}" type="text" value="${employee.name}" class="w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="Enter employee name">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Employee ID</label>
+                            <input id="employeeId_${index}" type="text" value="${employee.id}" class="w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="EMP00${index + 1}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input id="employeeEmail_${index}" type="email" value="${employee.email}" class="w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="employee${index + 1}@museum.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                            <input id="employeePassword_${index}" type="text" value="${employee.password}" class="w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="Password">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            manageEmployeesMessage.classList.add('hidden');
+        }
+
+        function saveEmployeeSettings() {
+            const updatedEmployees = [];
+            for (let index = 0; index < maxEmployeeRecords; index++) {
+                const name = document.getElementById(`employeeName_${index}`).value.trim();
+                const id = document.getElementById(`employeeId_${index}`).value.trim().toUpperCase();
+                const email = document.getElementById(`employeeEmail_${index}`).value.trim().toLowerCase();
+                const password = document.getElementById(`employeePassword_${index}`).value.trim();
+
+                if (!name || !id || !email || !password) {
+                    showManageEmployeesMessage('All employee fields are required for all 3 records.', 'error');
+                    return;
+                }
+                if (!isValidEmail(email)) {
+                    showManageEmployeesMessage(`Employee ${index + 1} email is invalid.`, 'error');
+                    return;
+                }
+                if (!isValidID(id)) {
+                    showManageEmployeesMessage(`Employee ${index + 1} ID is invalid. Use 3-10 letters/numbers.`, 'error');
+                    return;
+                }
+
+                updatedEmployees.push({ name, email, id, password, role: 'employee' });
+            }
+
+            managedEmployees = updatedEmployees;
+            localStorage.setItem('managedEmployees', JSON.stringify(managedEmployees));
+            
+            // Record change
+            recordChange('employee', 'update', 'all', 'Employee records updated');
+            
+            showManageEmployeesMessage('Employee login records updated successfully.', 'success');
+        }
+
+        function showManageEmployeesMessage(message, type) {
+            manageEmployeesMessage.textContent = message;
+            manageEmployeesMessage.className = type === 'success'
+                ? 'mt-4 p-4 rounded-lg text-sm bg-green-50 text-green-800 border border-green-200'
+                : 'mt-4 p-4 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200';
+            manageEmployeesMessage.classList.remove('hidden');
+        }
+
+        function renderEmployeeCredentials() {
+            employeeCredentialsList.innerHTML = managedEmployees.map((employee, index) => `
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h5 class="font-semibold text-green-800 mb-2">Employee ${index + 1}</h5>
+                    <div class="space-y-1">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Name:</span>
+                            <span class="text-sm font-mono text-green-600">${employee.name}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Email:</span>
+                            <span class="text-sm font-mono text-green-600">${employee.email}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">ID:</span>
+                            <span class="text-sm font-mono text-green-600">${employee.id}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Password:</span>
+                            <span class="text-sm font-mono text-green-600">${employee.password}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Sample booking data (fallback if no shared data exists)
+        let allBookings = [];
+
+        // Currency configuration
+        const currency = {
+            symbol: '₹',
+            code: 'INR',
+            rate: 83.50 // 1 USD = 83.50 INR
+        };
+
+        let filteredBookings = [...allBookings];
+        let currentView = 'bookings';
+        let currentCalendarDate = new Date();
+        const maxEmployeeRecords = 3;
+        let managedEmployees = [];
+
+        // Initialize
+        window.addEventListener('load', function() {
+            checkAuth();
+            loadAllBookings();
+            loadManageEmployees();
+            updateUserInfo();
+            updateCurrentDate();
+            updateStats();
+            showAllBookings();
+        });
+
+        // Real-time updates when bookings change from other tabs/windows
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'museumBookings') {
+                loadAllBookings();
+                filteredBookings = [...allBookings];
+                updateStats();
+                showAllBookings();
+            }
+        });
+
+        // Check authentication
+        function checkAuth() {
+            const user = localStorage.getItem('user');
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            
+            if (!user || !isLoggedIn) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const userData = JSON.parse(user);
+            if (userData.role !== 'manager') {
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Update user info
+        function updateUserInfo() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            userName.textContent = user.name || 'Manager';
+            document.getElementById('userId').textContent = `ID: ${user.id || 'N/A'}`;
+        }
+
+        // Update current date
+        function updateCurrentDate() {
+            const today = new Date();
+            currentDate.textContent = today.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+
+        // Update statistics
+        function updateStats() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayBookingsData = allBookings.filter(b => b.visitDate === today && b.status === 'confirmed');
+            
+            totalBookings.textContent = allBookings.length;
+            todayBookings.textContent = todayBookingsData.length;
+            todayRevenue.textContent = currency.symbol + (todayBookingsData.reduce((sum, b) => sum + b.totalPrice, 0) * currency.rate).toFixed(2);
+            
+            // Calculate unique customers
+            const uniqueCustomers = new Set(allBookings.map(b => b.customerEmail));
+            totalCustomers.textContent = uniqueCustomers.size;
+        }
+
+        // Mobile menu toggle
+        mobileMenuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('hidden');
+        });
+
+        // Show all bookings
+        function showAllBookings() {
+            currentView = 'bookings';
+            calendarSection.classList.add('hidden');
+            bookingsSection.classList.remove('hidden');
+            statsSection.classList.add('hidden');
+            manageEmployeesSection.classList.add('hidden');
+            viewCredentialsSection.classList.add('hidden');
+            exportDataSection.classList.add('hidden');
+            bookingsTitle.textContent = 'All Bookings';
+            filteredBookings = [...allBookings];
+            displayBookings();
+        }
+
+        // Show today's bookings
+        function showTodayBookings() {
+            currentView = 'bookings';
+            calendarSection.classList.add('hidden');
+            bookingsSection.classList.remove('hidden');
+            statsSection.classList.add('hidden');
+            manageEmployeesSection.classList.add('hidden');
+            viewCredentialsSection.classList.add('hidden');
+            exportDataSection.classList.add('hidden');
+            
+            const today = new Date().toISOString().split('T')[0];
+            filteredBookings = allBookings.filter(b => b.visitDate === today);
+            bookingsTitle.textContent = "Today's Bookings";
+            displayBookings();
+        }
+
+        // Show calendar view
+        function showCalendar() {
+            currentView = 'calendar';
+            calendarSection.classList.remove('hidden');
+            bookingsSection.classList.add('hidden');
+            statsSection.classList.add('hidden');
+            manageEmployeesSection.classList.add('hidden');
+            viewCredentialsSection.classList.add('hidden');
+            exportDataSection.classList.add('hidden');
+            renderCalendar();
+        }
+
+        // Show statistics
+        function showBookingStats() {
+            currentView = 'stats';
+            calendarSection.classList.add('hidden');
+            bookingsSection.classList.add('hidden');
+            statsSection.classList.remove('hidden');
+            manageEmployeesSection.classList.add('hidden');
+            viewCredentialsSection.classList.add('hidden');
+            exportDataSection.classList.add('hidden');
+            updateStatistics();
+        }
+
+        // Render calendar
+        function renderCalendar() {
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            
+            currentMonth.textContent = currentCalendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            let calendarHTML = '';
+            
+            // Empty cells for days before month starts
+            for (let i = 0; i < firstDay; i++) {
+                calendarHTML += '<div class="calendar-day p-2"></div>';
+            }
+            
+            // Days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const bookingsOnDay = allBookings.filter(b => b.visitDate === dateStr);
+                const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
+                
+                let classes = 'calendar-day p-2 border rounded cursor-pointer';
+                if (bookingsOnDay.length > 0) {
+                    classes += ' booked';
+                }
+                if (isToday) {
+                    classes += ' selected';
+                }
+                
+                calendarHTML += `
+                    <div class="${classes}" onclick="selectDate('${dateStr}')">
+                        <div class="text-sm font-medium">${day}</div>
+                        ${bookingsOnDay.length > 0 ? `<div class="text-xs text-blue-600">${bookingsOnDay.length} bookings</div>` : ''}
+                    </div>
+                `;
+            }
+            
+            calendarGrid.innerHTML = calendarHTML;
+        }
+
+        // Previous month
+        function previousMonth() {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendar();
+        }
+
+        // Next month
+        function nextMonth() {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        // Select date
+        function selectDate(dateStr) {
+            filteredBookings = allBookings.filter(b => b.visitDate === dateStr);
+            showAllBookings();
+            dateFilter.value = dateStr;
+        }
+
+        // Display bookings
+        function displayBookings() {
+            if (filteredBookings.length === 0) {
+                bookingsList.classList.add('hidden');
+                noBookings.classList.remove('hidden');
+                return;
+            }
+
+            bookingsList.classList.remove('hidden');
+            noBookings.classList.add('hidden');
+
+            bookingsList.innerHTML = filteredBookings.map(booking => {
+                const statusColors = {
+                    confirmed: 'bg-green-100 text-green-800',
+                    pending: 'bg-yellow-100 text-yellow-800',
+                    cancelled: 'bg-red-100 text-red-800'
+                };
+
+                const statusIcons = {
+                    confirmed: 'fa-check-circle',
+                    pending: 'fa-clock',
+                    cancelled: 'fa-times-circle'
+                };
+
+                const totalPriceINR = booking.totalPrice * currency.rate;
+
+                return `
+                    <div class="booking-card bg-white border rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900">${booking.customerName}</h4>
+                                <p class="text-sm text-gray-600">Booking ID: ${booking.id}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-2xl font-bold text-blue-600">${currency.symbol}${totalPriceINR.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <p class="text-sm text-gray-600">Email</p>
+                                <p class="font-medium">${booking.customerEmail}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Phone</p>
+                                <p class="font-medium">${booking.phoneNumber}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Ticket Type</p>
+                                <p class="font-medium">${booking.ticketType}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Visit Date</p>
+                                <p class="font-medium">${new Date(booking.visitDate).toLocaleDateString()}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Visit Time</p>
+                                <p class="font-medium">${booking.visitTime}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Tickets</p>
+                                <p class="font-medium">${booking.ticketCount}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <span class="status-badge inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusColors[booking.status]}">
+                                    <i class="fas ${statusIcons[booking.status]} mr-2"></i>
+                                    ${booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                                </span>
+                                <span class="text-sm text-gray-600">
+                                    <i class="fas fa-calendar-plus mr-2"></i>
+                                    Booked: ${new Date(booking.bookingDate).toLocaleDateString()}
+                                </span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="editBooking('${booking.id}')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                                    <i class="fas fa-edit mr-1"></i>
+                                    Edit
+                                </button>
+                                <button onclick="deleteBooking('${booking.id}')" class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">
+                                    <i class="fas fa-trash mr-1"></i>
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Edit booking
+        function editBooking(bookingId) {
+            const booking = allBookings.find(b => b.id === bookingId);
+            if (!booking) return;
+
+            editContent.innerHTML = `
+                <form id="editForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Customer Name</label>
+                            <input type="text" id="editCustomerName" value="${booking.customerName}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Customer Email</label>
+                            <input type="email" id="editCustomerEmail" value="${booking.customerEmail}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                            <input type="tel" id="editPhoneNumber" value="${booking.phoneNumber}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Ticket Type</label>
+                            <select id="editTicketType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="Adult General Admission" ${booking.ticketType === 'Adult General Admission' ? 'selected' : ''}>Adult General Admission</option>
+                                <option value="Child Ticket" ${booking.ticketType === 'Child Ticket' ? 'selected' : ''}>Child Ticket</option>
+                                <option value="Senior Ticket" ${booking.ticketType === 'Senior Ticket' ? 'selected' : ''}>Senior Ticket</option>
+                                <option value="Family Package" ${booking.ticketType === 'Family Package' ? 'selected' : ''}>Family Package</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Visit Date</label>
+                            <input type="date" id="editVisitDate" value="${booking.visitDate}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Visit Time</label>
+                            <select id="editVisitTime" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="09:00" ${booking.visitTime === '09:00' ? 'selected' : ''}>9:00 AM</option>
+                                <option value="10:00" ${booking.visitTime === '10:00' ? 'selected' : ''}>10:00 AM</option>
+                                <option value="11:00" ${booking.visitTime === '11:00' ? 'selected' : ''}>11:00 AM</option>
+                                <option value="12:00" ${booking.visitTime === '12:00' ? 'selected' : ''}>12:00 PM</option>
+                                <option value="13:00" ${booking.visitTime === '13:00' ? 'selected' : ''}>1:00 PM</option>
+                                <option value="14:00" ${booking.visitTime === '14:00' ? 'selected' : ''}>2:00 PM</option>
+                                <option value="15:00" ${booking.visitTime === '15:00' ? 'selected' : ''}>3:00 PM</option>
+                                <option value="16:00" ${booking.visitTime === '16:00' ? 'selected' : ''}>4:00 PM</option>
+                                <option value="17:00" ${booking.visitTime === '17:00' ? 'selected' : ''}>5:00 PM</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Number of Tickets</label>
+                            <input type="number" id="editTicketCount" value="${booking.ticketCount}" min="1" max="10" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                            <select id="editStatus" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="confirmed" ${booking.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                                <option value="pending" ${booking.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                <option value="cancelled" ${booking.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Current Price (USD)</label>
+                            <p class="text-lg font-semibold text-gray-900">$${booking.totalPrice}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Current Price (₹)</label>
+                            <p class="text-lg font-semibold text-green-600">${currency.symbol}${(booking.totalPrice * currency.rate).toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-save mr-2"></i>
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            `;
+
+            editModal.classList.remove('hidden');
+            editModal.classList.add('flex');
+
+            // Handle form submission
+            document.getElementById('editForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveBookingChanges(bookingId);
+            });
+        }
+
+        // Save booking changes
+        function saveBookingChanges(bookingId) {
+            const booking = allBookings.find(b => b.id === bookingId);
+            if (!booking) return;
+
+            booking.customerName = document.getElementById('editCustomerName').value;
+            booking.customerEmail = document.getElementById('editCustomerEmail').value;
+            booking.phoneNumber = document.getElementById('editPhoneNumber').value;
+            booking.ticketType = document.getElementById('editTicketType').value;
+            booking.visitDate = document.getElementById('editVisitDate').value;
+            booking.visitTime = document.getElementById('editVisitTime').value;
+            booking.ticketCount = parseInt(document.getElementById('editTicketCount').value);
+            booking.status = document.getElementById('editStatus').value;
+
+            // Recalculate total price based on ticket type
+            const prices = {
+                'Adult General Admission': 20,
+                'Child Ticket': 10,
+                'Senior Ticket': 15,
+                'Family Package': 50
+            };
+            booking.totalPrice = prices[booking.ticketType] * booking.ticketCount;
+            booking.totalPriceINR = booking.totalPrice * currency.rate;
+
+            // Record change
+            recordChange('booking', 'update', bookingId, 'Booking updated');
+
+            saveAllBookings();
+            displayBookings();
+            updateStats();
+            closeEditModal();
+            const totalPriceINR = booking.totalPrice * currency.rate;
+            alert(`Booking updated successfully! Total: ${currency.symbol}${totalPriceINR.toFixed(2)} (${currency.code})`);
+        }
+
+        // Delete booking
+        function deleteBooking(bookingId) {
+            if (confirm('Are you sure you want to delete this booking? This action cannot be undone.')) {
+                // Record change
+                recordChange('booking', 'delete', bookingId, 'Booking deleted');
+                
+                allBookings = allBookings.filter(b => b.id !== bookingId);
+                filteredBookings = filteredBookings.filter(b => b.id !== bookingId);
+                saveAllBookings();
+                displayBookings();
+                updateStats();
+                alert('Booking deleted successfully!');
+            }
+        }
+
+        // Close edit modal
+        function closeEditModal() {
+            editModal.classList.add('hidden');
+            editModal.classList.remove('flex');
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const dateFilterValue = dateFilter.value;
+            const searchValue = searchInput.value.toLowerCase().trim();
+            const statusValue = statusFilter.value;
+
+            filteredBookings = allBookings.filter(booking => {
+                let matches = true;
+
+                if (dateFilterValue && booking.visitDate !== dateFilterValue) {
+                    matches = false;
+                }
+
+                if (searchValue && !booking.id.toLowerCase().includes(searchValue) && 
+                    !booking.customerName.toLowerCase().includes(searchValue) && 
+                    !booking.customerEmail.toLowerCase().includes(searchValue)) {
+                    matches = false;
+                }
+
+                if (statusValue && booking.status !== statusValue) {
+                    matches = false;
+                }
+
+                return matches;
+            });
+
+            displayBookings();
+        }
+
+        // Clear filters
+        function clearFilters() {
+            dateFilter.value = '';
+            searchInput.value = '';
+            statusFilter.value = '';
+            filteredBookings = [...allBookings];
+            displayBookings();
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayBookingsData = allBookings.filter(b => b.visitDate === today && b.status === 'confirmed');
+            
+            document.getElementById('todayRevenueStat').textContent = currency.symbol + (todayBookingsData.reduce((sum, b) => sum + b.totalPrice, 0) * currency.rate).toFixed(2);
+            
+            // Calculate week revenue
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            const weekBookings = allBookings.filter(b => new Date(b.visitDate) >= weekAgo && b.status === 'confirmed');
+            document.getElementById('weekRevenue').textContent = currency.symbol + (weekBookings.reduce((sum, b) => sum + b.totalPrice, 0) * currency.rate).toFixed(2);
+            
+            // Calculate month revenue
+            const monthAgo = new Date();
+            monthAgo.setMonth(monthAgo.getMonth() - 1);
+            const monthBookings = allBookings.filter(b => new Date(b.visitDate) >= monthAgo && b.status === 'confirmed');
+            document.getElementById('monthRevenue').textContent = currency.symbol + (monthBookings.reduce((sum, b) => sum + b.totalPrice, 0) * currency.rate).toFixed(2);
+            
+            // Calculate average booking value
+            const confirmedBookings = allBookings.filter(b => b.status === 'confirmed');
+            const avgValue = confirmedBookings.length > 0 ? 
+                confirmedBookings.reduce((sum, b) => sum + b.totalPrice, 0) / confirmedBookings.length : 0;
+            document.getElementById('avgBookingValue').textContent = currency.symbol + (avgValue * currency.rate).toFixed(2);
+            
+            // Find most popular ticket
+            const ticketCounts = {};
+            confirmedBookings.forEach(b => {
+                ticketCounts[b.ticketType] = (ticketCounts[b.ticketType] || 0) + 1;
+            });
+            const popularTicket = Object.keys(ticketCounts).reduce((a, b) => ticketCounts[a] > ticketCounts[b] ? a : b);
+            document.getElementById('popularTicket').textContent = popularTicket || 'N/A';
+            
+            // Find peak booking time
+            const timeCounts = {};
+            confirmedBookings.forEach(b => {
+                timeCounts[b.visitTime] = (timeCounts[b.visitTime] || 0) + 1;
+            });
+            const peakTime = Object.keys(timeCounts).reduce((a, b) => timeCounts[a] > timeCounts[b] ? a : b);
+            document.getElementById('peakTime').textContent = peakTime || 'N/A';
+        }
+
+        // Show manage employees section
+        function showManageEmployees() {
+            currentView = 'manageEmployees';
+            calendarSection.classList.add('hidden');
+            bookingsSection.classList.add('hidden');
+            statsSection.classList.add('hidden');
+            manageEmployeesSection.classList.remove('hidden');
+            viewCredentialsSection.classList.add('hidden');
+            exportDataSection.classList.add('hidden');
+            renderManageEmployees();
+        }
+
+        // Show view credentials section
+        function showViewCredentials() {
+            currentView = 'viewCredentials';
+            calendarSection.classList.add('hidden');
+            bookingsSection.classList.add('hidden');
+            statsSection.classList.add('hidden');
+            manageEmployeesSection.classList.add('hidden');
+            viewCredentialsSection.classList.remove('hidden');
+            exportDataSection.classList.add('hidden');
+            renderEmployeeCredentials();
+        }
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function isValidID(id) {
+            return /^[A-Z0-9]{3,10}$/i.test(id);
+        }
+
+        // Show profile
+        function showProfile() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            alert(`Manager Profile:\n\nName: ${user.name}\nEmail: ${user.email}\nID: ${user.id}\nRole: ${user.role}\nDepartment: Museum Management\nAccess Level: Full System Access`);
+        }
+
+        // Refresh data
+        function refreshData() {
+            updateCurrentDate();
+            updateStats();
+            if (currentView === 'calendar') {
+                renderCalendar();
+            } else {
+                displayBookings();
+            }
+        }
+
+        // Show export data section
+        function showExportData() {
+            currentView = 'export';
+            calendarSection.classList.add('hidden');
+            bookingsSection.classList.add('hidden');
+            statsSection.classList.add('hidden');
+            manageEmployeesSection.classList.add('hidden');
+            viewCredentialsSection.classList.add('hidden');
+            exportDataSection.classList.remove('hidden');
+            
+            exportDataSection.innerHTML = `
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                        <i class="fas fa-download mr-3 text-blue-600"></i>
+                        Export Data
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <!-- Customer Data Export -->
+                        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-users text-3xl text-blue-600 mr-4"></i>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900">Customer Data</h3>
+                                    <p class="text-sm text-gray-600">Export registered customers</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button onclick="exportCustomersCSV()" class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                                    <i class="fas fa-file-csv mr-2"></i>
+                                    CSV
+                                </button>
+                                <button onclick="exportCustomersJSON()" class="flex-1 bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors">
+                                    <i class="fas fa-file-code mr-2"></i>
+                                    JSON
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Employee Data Export -->
+                        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-id-badge text-3xl text-green-600 mr-4"></i>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900">Employee Data</h3>
+                                    <p class="text-sm text-gray-600">Export employee information</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button onclick="exportEmployeesCSV()" class="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors">
+                                    <i class="fas fa-file-csv mr-2"></i>
+                                    CSV
+                                </button>
+                                <button onclick="exportEmployeesJSON()" class="flex-1 bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition-colors">
+                                    <i class="fas fa-file-code mr-2"></i>
+                                    JSON
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Booking Data Export -->
+                        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6 border border-purple-200">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-ticket-alt text-3xl text-purple-600 mr-4"></i>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900">Booking Data</h3>
+                                    <p class="text-sm text-gray-600">Export all bookings</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button onclick="exportBookingsCSV()" class="flex-1 bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors">
+                                    <i class="fas fa-file-csv mr-2"></i>
+                                    CSV
+                                </button>
+                                <button onclick="exportBookingsJSON()" class="flex-1 bg-purple-500 text-white py-3 px-4 rounded-lg hover:bg-purple-600 transition-colors">
+                                    <i class="fas fa-file-code mr-2"></i>
+                                    JSON
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Change History Export -->
+                        <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-6 border border-red-200">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-history text-3xl text-red-600 mr-4"></i>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900">Change History</h3>
+                                    <p class="text-sm text-gray-600">Export system changes</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button onclick="exportChangeHistoryCSV()" class="flex-1 bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition-colors">
+                                    <i class="fas fa-file-csv mr-2"></i>
+                                    CSV
+                                </button>
+                                <button onclick="exportChangeHistoryJSON()" class="flex-1 bg-red-500 text-white py-3 px-4 rounded-lg hover:bg-red-600 transition-colors">
+                                    <i class="fas fa-file-code mr-2"></i>
+                                    JSON
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+                            Export Information
+                        </h3>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li><strong>Customer Data:</strong> Includes name, email, phone, registration date, login count, and last login time</li>
+                            <li><strong>Employee Data:</strong> Includes employee ID, name, email, role, hire date, login count, and last login time</li>
+                            <li><strong>Booking Data:</strong> Includes booking ID, customer details, ticket info, dates, and status</li>
+                            <li><strong>Change History:</strong> Includes timestamp, user, entity type, action, and description of changes</li>
+                        </ul>
+                        <p class="mt-4 text-sm text-gray-500">
+                            Data can be exported in CSV format (for spreadsheets) or JSON format (code-like structure for developers).
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Export customers to CSV
+        function exportCustomersCSV() {
+            const registeredCredentials = JSON.parse(localStorage.getItem('registeredCredentials') || '{}');
+            const loginHistory = JSON.parse(localStorage.getItem('loginHistory') || '[]');
+            const customers = [];
+            
+            // Extract customer data
+            Object.keys(registeredCredentials).forEach(key => {
+                const user = registeredCredentials[key];
+                if (user.role === 'customer' && user.email) {
+                    const userId = user.id || key;
+                    const userLogins = loginHistory.filter(login => login.userId === userId || login.email === user.email);
+                    const loginCount = userLogins.length;
+                    const lastLogin = userLogins.length > 0 ? userLogins[userLogins.length - 1].timestamp : '';
+                    
+                    customers.push({
+                        id: userId,
+                        name: user.name,
+                        email: user.email,
+                        phone: user.phone || '',
+                        role: user.role,
+                        registrationDate: user.registrationDate || new Date().toISOString().split('T')[0],
+                        loginCount: loginCount,
+                        lastLoginTime: lastLogin
+                    });
+                }
+            });
+            
+            if (customers.length === 0) {
+                alert('No customer data available to export.');
+                return;
+            }
+            
+            const csvContent = convertToCSV(customers);
+            downloadCSV(csvContent, 'customers.csv');
+        }
+
+        // Export employees to CSV
+        function exportEmployeesCSV() {
+            const managedEmployees = JSON.parse(localStorage.getItem('managedEmployees') || '[]');
+            const registeredCredentials = JSON.parse(localStorage.getItem('registeredCredentials') || '{}');
+            const loginHistory = JSON.parse(localStorage.getItem('loginHistory') || '[]');
+            
+            const employees = [];
+            
+            // Add managed employees
+            managedEmployees.forEach(emp => {
+                const userLogins = loginHistory.filter(login => login.userId === emp.id || login.email === emp.email);
+                const loginCount = userLogins.length;
+                const lastLogin = userLogins.length > 0 ? userLogins[userLogins.length - 1].timestamp : '';
+                
+                employees.push({
+                    id: emp.id,
+                    name: emp.name,
+                    email: emp.email,
+                    role: emp.role,
+                    hireDate: emp.hireDate || new Date().toISOString().split('T')[0],
+                    phone: emp.phone || '',
+                    department: emp.department || 'General',
+                    loginCount: loginCount,
+                    lastLoginTime: lastLogin
+                });
+            });
+            
+            // Add employees from credentials who are not customers
+            Object.keys(registeredCredentials).forEach(key => {
+                const user = registeredCredentials[key];
+                if (user.role !== 'customer' && user.role !== 'manager' && !employees.find(e => e.email === user.email)) {
+                    const userLogins = loginHistory.filter(login => login.userId === (user.id || key) || login.email === user.email);
+                    const loginCount = userLogins.length;
+                    const lastLogin = userLogins.length > 0 ? userLogins[userLogins.length - 1].timestamp : '';
+                    
+                    employees.push({
+                        id: user.id || key,
+                        name: user.name,
+                        email: user.email,
+                        role: user.role,
+                        hireDate: user.hireDate || new Date().toISOString().split('T')[0],
+                        phone: user.phone || '',
+                        department: user.department || 'General',
+                        loginCount: loginCount,
+                        lastLoginTime: lastLogin
+                    });
+                }
+            });
+            
+            if (employees.length === 0) {
+                alert('No employee data available to export.');
+                return;
+            }
+            
+            const csvContent = convertToCSV(employees);
+            downloadCSV(csvContent, 'employees.csv');
+        }
+
+        // Export bookings to CSV
+        function exportBookingsCSV() {
+            if (allBookings.length === 0) {
+                alert('No booking data available to export.');
+                return;
+            }
+            
+            const bookingsForExport = allBookings.map(booking => ({
+                bookingId: booking.id,
+                customerName: booking.customerName,
+                customerEmail: booking.customerEmail,
+                phoneNumber: booking.phoneNumber,
+                ticketType: booking.ticketType,
+                ticketCount: booking.ticketCount,
+                visitDate: booking.visitDate,
+                visitTime: booking.visitTime,
+                totalPriceUSD: booking.totalPrice,
+                totalPriceINR: (booking.totalPrice * currency.rate).toFixed(2),
+                status: booking.status,
+                bookingDate: booking.bookingDate || new Date().toISOString().split('T')[0]
+            }));
+            
+            const csvContent = convertToCSV(bookingsForExport);
+            downloadCSV(csvContent, 'bookings.csv');
+        }
+
+        // Export change history to CSV
+        function exportChangeHistoryCSV() {
+            const changeHistory = JSON.parse(localStorage.getItem('changeHistory') || '[]');
+            
+            if (changeHistory.length === 0) {
+                alert('No change history available to export.');
+                return;
+            }
+            
+            const changesForExport = changeHistory.map(change => ({
+                timestamp: change.timestamp,
+                user: change.user,
+                entityType: change.entityType,
+                action: change.action,
+                entityId: change.entityId,
+                description: change.description
+            }));
+            
+            const csvContent = convertToCSV(changesForExport);
+            downloadCSV(csvContent, 'change_history.csv');
+        }
+
+        // Export customers to JSON
+        function exportCustomersJSON() {
+            const registeredCredentials = JSON.parse(localStorage.getItem('registeredCredentials') || '{}');
+            const loginHistory = JSON.parse(localStorage.getItem('loginHistory') || '[]');
+            const customers = [];
+            
+            // Extract customer data
+            Object.keys(registeredCredentials).forEach(key => {
+                const user = registeredCredentials[key];
+                if (user.role === 'customer' && user.email) {
+                    const userId = user.id || key;
+                    const userLogins = loginHistory.filter(login => login.userId === userId || login.email === user.email);
+                    const loginCount = userLogins.length;
+                    const lastLogin = userLogins.length > 0 ? userLogins[userLogins.length - 1].timestamp : '';
+                    
+                    customers.push({
+                        id: userId,
+                        name: user.name,
+                        email: user.email,
+                        phone: user.phone || '',
+                        role: user.role,
+                        registrationDate: user.registrationDate || new Date().toISOString().split('T')[0],
+                        loginCount: loginCount,
+                        lastLoginTime: lastLogin
+                    });
+                }
+            });
+            
+            if (customers.length === 0) {
+                alert('No customer data available to export.');
+                return;
+            }
+            
+            downloadJSON(customers, 'customers.json');
+        }
+
+        // Export employees to JSON
+        function exportEmployeesJSON() {
+            const managedEmployees = JSON.parse(localStorage.getItem('managedEmployees') || '[]');
+            const registeredCredentials = JSON.parse(localStorage.getItem('registeredCredentials') || '{}');
+            const loginHistory = JSON.parse(localStorage.getItem('loginHistory') || '[]');
+            
+            const employees = [];
+            
+            // Add managed employees
+            managedEmployees.forEach(emp => {
+                const userLogins = loginHistory.filter(login => login.userId === emp.id || login.email === emp.email);
+                const loginCount = userLogins.length;
+                const lastLogin = userLogins.length > 0 ? userLogins[userLogins.length - 1].timestamp : '';
+                
+                employees.push({
+                    id: emp.id,
+                    name: emp.name,
+                    email: emp.email,
+                    role: emp.role,
+                    hireDate: emp.hireDate || new Date().toISOString().split('T')[0],
+                    phone: emp.phone || '',
+                    department: emp.department || 'General',
+                    loginCount: loginCount,
+                    lastLoginTime: lastLogin
+                });
+            });
+            
+            // Add employees from credentials who are not customers
+            Object.keys(registeredCredentials).forEach(key => {
+                const user = registeredCredentials[key];
+                if (user.role !== 'customer' && user.role !== 'manager' && !employees.find(e => e.email === user.email)) {
+                    const userLogins = loginHistory.filter(login => login.userId === (user.id || key) || login.email === user.email);
+                    const loginCount = userLogins.length;
+                    const lastLogin = userLogins.length > 0 ? userLogins[userLogins.length - 1].timestamp : '';
+                    
+                    employees.push({
+                        id: user.id || key,
+                        name: user.name,
+                        email: user.email,
+                        role: user.role,
+                        hireDate: user.hireDate || new Date().toISOString().split('T')[0],
+                        phone: user.phone || '',
+                        department: user.department || 'General',
+                        loginCount: loginCount,
+                        lastLoginTime: lastLogin
+                    });
+                }
+            });
+            
+            if (employees.length === 0) {
+                alert('No employee data available to export.');
+                return;
+            }
+            
+            downloadJSON(employees, 'employees.json');
+        }
+
+        // Export bookings to JSON
+        function exportBookingsJSON() {
+            if (allBookings.length === 0) {
+                alert('No booking data available to export.');
+                return;
+            }
+            
+            const bookingsForExport = allBookings.map(booking => ({
+                bookingId: booking.id,
+                customerName: booking.customerName,
+                customerEmail: booking.customerEmail,
+                phoneNumber: booking.phoneNumber,
+                ticketType: booking.ticketType,
+                ticketCount: booking.ticketCount,
+                visitDate: booking.visitDate,
+                visitTime: booking.visitTime,
+                totalPriceUSD: booking.totalPrice,
+                totalPriceINR: (booking.totalPrice * currency.rate).toFixed(2),
+                status: booking.status,
+                bookingDate: booking.bookingDate || new Date().toISOString().split('T')[0]
+            }));
+            
+            downloadJSON(bookingsForExport, 'bookings.json');
+        }
+
+        // Export change history to JSON
+        function exportChangeHistoryJSON() {
+            const changeHistory = JSON.parse(localStorage.getItem('changeHistory') || '[]');
+            
+            if (changeHistory.length === 0) {
+                alert('No change history available to export.');
+                return;
+            }
+            
+            downloadJSON(changeHistory, 'change_history.json');
+        }
+
+        // Convert array of objects to CSV string
+        function convertToCSV(data) {
+            if (data.length === 0) return '';
+            
+            const headers = Object.keys(data[0]);
+            const csvRows = [];
+            
+            // Add headers
+            csvRows.push(headers.join(','));
+            
+            // Add data rows
+            data.forEach(row => {
+                const values = headers.map(header => {
+                    const value = row[header] || '';
+                    // Escape commas and quotes in values
+                    if (typeof value === 'string' && (value.includes(',') || value.includes('"') || value.includes('\n'))) {
+                        return `"${value.replace(/"/g, '""')}"`;
+                    }
+                    return value;
+                });
+                csvRows.push(values.join(','));
+            });
+            
+            return csvRows.join('\n');
+        }
+
+        // Download CSV file
+        function downloadCSV(csvContent, filename) {
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        // Download JSON file
+        function downloadJSON(data, filename) {
+            const jsonContent = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        // Record change event
+        function recordChange(entityType, action, entityId, description) {
+            const changeHistory = JSON.parse(localStorage.getItem('changeHistory') || '[]');
+            const changeEvent = {
+                entityType: entityType,
+                action: action,
+                entityId: entityId,
+                description: description,
+                timestamp: new Date().toISOString(),
+                user: JSON.parse(localStorage.getItem('user') || '{}').name || 'Unknown'
+            };
+            changeHistory.push(changeEvent);
+            localStorage.setItem('changeHistory', JSON.stringify(changeHistory));
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('isLoggedIn');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

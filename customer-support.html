@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Support - Museum Booking System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .qa-item {
+            transition: all 0.3s ease;
+        }
+        .qa-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .search-highlight {
+            background-color: #fef3c7;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex items-center">
+                        <i class="fas fa-headset text-2xl text-blue-600 mr-3"></i>
+                        <span class="text-xl font-bold text-gray-800">Customer Support</span>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="index.html" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                        <a href="login.html" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Login</a>
+                        <a href="customer-support.html" class="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Support</a>
+                        <a href="register.html" class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700">Sign Up</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-4 pulse-animation">
+                <i class="fas fa-headset text-4xl text-blue-600"></i>
+            </div>
+            <h1 class="text-4xl font-bold text-white mb-4">Customer Support Center</h1>
+            <p class="text-xl text-blue-100 mb-8">Find answers to your questions about Museum Booking System</p>
+            
+            <!-- Search -->
+            <div class="max-w-2xl mx-auto mb-8">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Search for help..."
+                        class="w-full px-4 py-3 pr-12 rounded-lg border border-white border-opacity-20 bg-white bg-opacity-90 text-white placeholder-white placeholder-opacity-70 focus:ring-2 focus:ring-white focus:border-transparent"
+                        onkeyup="searchQA()"
+                    >
+                    <i class="fas fa-search absolute right-4 top-1/2 transform -translate-y-1/2 text-white opacity-70"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Help Categories -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <button onclick="filterCategory('all')" class="glass-effect p-4 rounded-lg hover:bg-white hover:bg-opacity-100 transition-all">
+                <i class="fas fa-globe text-2xl text-blue-600 mb-2"></i>
+                <h3 class="text-lg font-semibold text-gray-800">All Topics</h3>
+                <p class="text-gray-600 text-sm">View all help topics</p>
+            </button>
+            <button onclick="filterCategory('booking')" class="glass-effect p-4 rounded-lg hover:bg-white hover:bg-opacity-100 transition-all">
+                <i class="fas fa-ticket-alt text-2xl text-green-600 mb-2"></i>
+                <h3 class="text-lg font-semibold text-gray-800">Booking Help</h3>
+                <p class="text-gray-600 text-sm">Ticket booking issues</p>
+            </button>
+            <button onclick="filterCategory('payment')" class="glass-effect p-4 rounded-lg hover:bg-white hover:bg-opacity-100 transition-all">
+                <i class="fas fa-credit-card text-2xl text-purple-600 mb-2"></i>
+                <h3 class="text-lg font-semibold text-gray-800">Payment Issues</h3>
+                <p class="text-gray-600 text-sm">Payment problems</p>
+            </button>
+            <button onclick="filterCategory('account')" class="glass-effect p-4 rounded-lg hover:bg-white hover:bg-opacity-100 transition-all">
+                <i class="fas fa-user text-2xl text-orange-600 mb-2"></i>
+                <h3 class="text-lg font-semibold text-gray-800">Account Help</h3>
+                <p class="text-gray-600 text-sm">Login & registration</p>
+            </button>
+        </div>
+
+        <!-- Q&A Items -->
+        <div id="qaContainer" class="space-y-6">
+            <!-- Booking Issues -->
+            <div class="qa-item glass-effect rounded-lg p-6" data-category="booking">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full">
+                            <i class="fas fa-question-circle text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">How do I book tickets if the website is not working?</h3>
+                        <p class="text-gray-600 mb-4">
+                            If you're experiencing issues with the website, try these solutions:<br><br>
+                            <strong>Quick Fixes:</strong><br>
+                            1. Refresh the page (Ctrl+F5 or Cmd+R)<br>
+                            2. Clear browser cache and cookies<br>
+                            3. Try a different browser (Chrome, Firefox, Safari)<br>
+                            4. Check your internet connection<br>
+                            5. Disable browser extensions temporarily<br>
+                            6. Use our mobile-friendly site on your phone<br><br>
+                            <strong>Alternative Booking Methods:</strong><br>
+                            • Call our support team at +91-XXXXXXXXXX<br>
+                            • Use our chatbot for instant assistance<br>
+                            • Visit our physical ticket counter<br>
+                            • Email us at support@museum.com<br><br>
+                            <strong>Still Need Help?</strong><br>
+                            Our support team is available 24/7 to assist you with booking tickets through alternative methods.
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Booking Issues</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="qa-item glass-effect rounded-lg p-6" data-category="booking">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full">
+                            <i class="fas fa-calendar-times text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">My booking was cancelled automatically. Why did this happen?</h3>
+                        <p class="text-gray-600 mb-4">
+                            Automatic booking cancellation can occur due to several reasons:<br><br>
+                            <strong>Common Reasons:</strong><br>
+                            1. <strong>Payment Timeout:</strong> Payment not completed within 15 minutes<br>
+                            2. <strong>Payment Failure:</strong> Card declined or insufficient funds<br>
+                            3. <strong>Session Expired:</strong> Booking page left open too long<br>
+                            4. <strong>System Maintenance:</strong> Scheduled system updates<br>
+                            5. <strong>Double Booking:</strong> Same ticket booked twice<br><br>
+                            <strong>What to Do:</strong><br>
+                            • Check your email for cancellation reason<br>
+                            • Contact your bank if payment failed<br>
+                            • Try booking again with different payment method<br>
+                            • Use UPI for instant confirmation<br>
+                            • Call support if issue persists<br><br>
+                            <strong>Prevention Tips:</strong><br>
+                            • Complete payment within 10 minutes<br>
+                            • Ensure sufficient funds in account<br>
+                            • Don't refresh payment page<br>
+                            • Use stable internet connection
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Booking Issues</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Issues -->
+            <div class="qa-item glass-effect rounded-lg p-6" data-category="payment">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-red-100 rounded-full">
+                            <i class="fas fa-credit-card text-red-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">My UPI payment failed. What should I do?</h3>
+                        <p class="text-gray-600 mb-4">
+                            If your UPI payment failed, follow these steps:<br><br>
+                            <strong>Immediate Actions:</strong><br>
+                            1. Check if amount was debited from your account<br>
+                            2. Verify UPI app is working properly<br>
+                            3. Check if you have sufficient balance<br>
+                            4. Ensure correct UPI PIN was entered<br>
+                            5. Try again with a different UPI app<br><br>
+                            <strong>If Amount Was Debited:</strong><br>
+                            • Don't try again - you may be charged twice<br>
+                            • Take screenshot of failed transaction<br>
+                            • Contact your bank immediately<br>
+                            • Email us at support@museum.com with details<br>
+                            • Call our support team at +91-XXXXXXXXXX<br><br>
+                            <strong>If Amount Was Not Debited:</strong><br>
+                            • Try booking again with same UPI app<br>
+                            • Check if UPI app is updated<br>
+                            • Try different payment method (Card/Net Banking)<br>
+                            • Ensure stable internet connection<br>
+                            • Clear browser cache and try again<br><br>
+                            <strong>UPI Error Codes:</strong><br>
+                            • "Insufficient Balance" - Add funds to account<br>
+                            • "Invalid UPI PIN" - Reset PIN through your UPI app<br>
+                            • "Transaction Failed" - Try again or contact bank<br>
+                            • "Timeout" - Check internet and try again
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Payment Issues</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="qa-item glass-effect rounded-lg p-6" data-category="payment">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-yellow-100 rounded-full">
+                            <i class="fas fa-rupee-sign text-yellow-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Why was I charged the wrong amount in Indian Rupees?</h3>
+                        <p class="text-gray-600 mb-4">
+                            If you notice incorrect charges in Indian Rupees, check these factors:<br><br>
+                            <strong>Possible Reasons:</strong><br>
+                            1. <strong>Currency Conversion:</strong> USD to INR rate fluctuation<br>
+                            2. <strong>Processing Fees:</strong> Bank or UPI app charges<br>
+                            3. <strong>International Fees:</strong> Cross-border transaction fees<br>
+                            4. <strong>Taxes:</strong> GST or service charges included<br>
+                            5. <strong>Multiple Tickets:</strong> Quantity not properly calculated<br><br>
+                            <strong>What to Check:</strong><br>
+                            • Review booking details before payment<br>
+                            • Verify ticket quantity selected<br>
+                            • Check for additional service fees<br>
+                            • Confirm currency conversion rate (₹83.50 per $1 USD)<br>
+                            • Look for hidden charges in final amount<br><br>
+                            <strong>Our Pricing (in Indian Rupees):</strong><br>
+                            • Adult Ticket: ₹30.00<br>
+                            • Child Ticket: ₹15.00<br>
+                            • Senior Ticket: ₹25.00<br>
+                            • Family Package: ₹75.00<br><br>
+                            <strong>Dispute Process:</strong><br>
+                            • Contact us immediately with transaction details<br>
+                            • Provide screenshot of charge amount<br>
+                            • Share booking reference number<br>
+                            • We'll investigate and resolve within 24 hours
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Payment Issues</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Issues -->
+            <div class="qa-item glass-effect rounded-lg p-6" data-category="account">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-full">
+                            <i class="fas fa-user-lock text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">I can't log in to my account. What should I do?</h3>
+                        <p class="text-gray-600 mb-4">
+                            If you're unable to log in, try these troubleshooting steps:<br><br>
+                            <strong>Login Issues Checklist:</strong><br>
+                            1. Verify correct email address is entered<br>
+                            2. Check for typos in password (case-sensitive)<br>
+                            3. Clear browser cache and cookies<br>
+                            4. Try "Forgot Password" if needed<br>
+                            5. Check if Caps Lock is on<br>
+                            6. Ensure correct role is selected (Customer/Employee/Manager)<br><br>
+                            <strong>Account Status Issues:</strong><br>
+                            • Your account may be locked after multiple failed attempts<br>
+                            • Account may not be verified (check email for verification link)<br>
+                            • Account may be suspended (contact support)<br>
+                            • Password may have expired (reset required)<br><br>
+                            <strong>Demo Account Access:</strong><br>
+                            • Customer: customer@museum.com / customer123<br>
+                            • Employee: employee@museum.com / employee123<br>
+                            • Manager: manager@museum.com / manager123<br><br>
+                            <strong>Still Can't Log In?</strong><br>
+                            • Contact our 24/7 support team<br>
+                            • Call: +91-XXXXXXXXXX<br>
+                            • Email: support@museum.com<br>
+                            • Use live chat on our website<br>
+                            • Visit our physical help desk at museum entrance
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Account Issues</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="qa-item glass-effect rounded-lg p-6" data-category="account">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-indigo-100 rounded-full">
+                            <i class="fas fa-mobile-alt text-indigo-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">I didn't receive the OTP for registration. How can I get help?</h3>
+                        <p class="text-gray-600 mb-4">
+                            If you're not receiving the OTP for account registration:<br><br>
+                            <strong>OTP Troubleshooting:</strong><br>
+                            1. Check your email spam/junk folder<br>
+                            2. Verify phone/WhatsApp number is correct with country code<br>
+                            3. Wait 2-3 minutes for SMS/email/WhatsApp delivery<br>
+                            4. Click "Resend OTP" button if available<br>
+                            5. Try alternative contact method (Email, SMS, or WhatsApp)<br>
+                            6. Check if your email provider blocks automated emails<br>
+                            7. Ensure phone/WhatsApp has good network coverage<br>
+                            8. Verify WhatsApp number is registered and active<br><br>
+                            <strong>WhatsApp OTP Specific:</strong><br>
+                            • WhatsApp must be installed and active<br>
+                            • Phone number must be registered with WhatsApp<br>
+                            • Check WhatsApp notifications and spam folder<br>
+                            • Ensure internet connection is stable<br><br>
+                            <strong>Common Issues:</strong><br>
+                            • Email provider marking OTP as spam<br>
+                            • Phone/WhatsApp number entered incorrectly<br>
+                            • Network delays in SMS/WhatsApp delivery<br>
+                            • OTP expired (valid for 10 minutes only)<br>
+                            • Multiple registration attempts<br>
+                            • WhatsApp business messages filtered<br><br>
+                            <strong>Alternative Registration:</strong><br>
+                            • Call our support team for manual verification<br>
+                            • Visit our museum registration desk<br>
+                            • Use different email address or phone number<br>
+                            • Contact us at: support@museum.com<br>
+                            • Call: +91-XXXXXXXXXX (24/7 support)<br><br>
+                            <strong>Security Note:</strong><br>
+                            Never share your OTP with anyone. Our staff will never ask for your OTP.
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Account Issues</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="qa-item glass-effect rounded-lg p-6" data-category="account">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full">
+                            <i class="fab fa-whatsapp text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">I'm not receiving WhatsApp OTP for login</h3>
+                        <p class="text-gray-600 mb-4">
+                            If you're not receiving the WhatsApp OTP during login:<br><br>
+                            <strong>WhatsApp OTP Troubleshooting:</strong><br>
+                            1. Ensure WhatsApp is installed and active on your device<br>
+                            2. Verify your phone number is registered with WhatsApp<br>
+                            3. Check that your WhatsApp number matches your account<br>
+                            4. Wait 2-3 minutes for message delivery<br>
+                            5. Check WhatsApp spam/filtered messages folder<br>
+                            6. Ensure stable internet connection<br>
+                            7. Try the "Resend OTP" button after 30 seconds<br><br>
+                            <strong>WhatsApp-Specific Issues:</strong><br>
+                            • WhatsApp business messages might be filtered<br>
+                            • Phone number must be exactly as registered<br>
+                            • WhatsApp must be updated to latest version<br>
+                            • Device storage should have space for messages<br>
+                            • Check if WhatsApp is blocked in your region<br><br>
+                            <strong>Alternative Solutions:</strong><br>
+                            • Use different WhatsApp number<br>
+                            • Contact support for account verification<br>
+                            • Use incognito/private browsing mode<br><br>
+                            <strong>Demo WhatsApp Numbers:</strong><br>
+                            • Customer: +1234567890<br>
+                            • Employee: +1987654321<br>
+                            • Manager: +1123456789
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Login Issues</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Results Message -->
+        <div id="noResults" class="hidden text-center py-12">
+            <div class="glass-effect rounded-lg p-8 max-w-2xl mx-auto">
+                <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">No matching help topics found</h3>
+                <p class="text-gray-500">Try different keywords or browse all categories above.</p>
+                <button onclick="clearSearch()" class="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                    Clear Search
+                </button>
+            </div>
+        </div>
+
+        <!-- Contact Support -->
+        <div class="text-center mt-12">
+            <div class="glass-effect rounded-lg p-8 max-w-4xl mx-auto">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Still Need Help?</h3>
+                <p class="text-gray-600 mb-6">
+                    Can't find the answer you're looking for? Our customer support team is here to help you 24/7 with any questions about the Museum Booking System.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="text-center">
+                        <div class="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mx-auto mb-3">
+                            <i class="fas fa-phone text-green-600 text-2xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900">Call Support</h4>
+                        <p class="text-gray-600">+91-XXXXXXXXXX</p>
+                        <p class="text-sm text-gray-500">24/7 Available</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mx-auto mb-3">
+                            <i class="fas fa-envelope text-blue-600 text-2xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900">Email Support</h4>
+                        <p class="text-gray-600">support@museum.com</p>
+                        <p class="text-sm text-gray-500">Response within 2 hours</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mx-auto mb-3">
+                            <i class="fas fa-comments text-purple-600 text-2xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900">Live Chat</h4>
+                        <p class="text-gray-600">Available on website</p>
+                        <p class="text-sm text-gray-500">Instant response</p>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-200 pt-6">
+                    <h4 class="font-semibold text-gray-900 mb-3">Business Hours</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-600"><strong>Phone Support:</strong></p>
+                            <p class="text-gray-600">24/7 (Emergency)</p>
+                            <p class="text-gray-600">9 AM - 9 PM (General)</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600"><strong>Email Support:</strong></p>
+                            <p class="text-gray-600">24/7 Available</p>
+                            <p class="text-gray-600">Response within 2 hours</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="index.html" class="hover:text-blue-400">Home</a></li>
+                        <li><a href="login.html" class="hover:text-blue-400">Login</a></li>
+                        <li><a href="register.html" class="hover:text-blue-400">Register</a></li>
+                        <li><a href="customer-dashboard.html" class="hover:text-blue-400">Dashboard</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Support</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-blue-400">Help Center</a></li>
+                        <li><a href="#" class="hover:text-blue-400">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-blue-400">Live Chat</a></li>
+                        <li><a href="customer-support.html" class="hover:text-blue-400">FAQ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Museum Info</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-blue-400">About Us</a></li>
+                        <li><a href="#" class="hover:text-blue-400">Exhibitions</a></li>
+                        <li><a href="#" class="hover:text-blue-400">Events</a></li>
+                        <li><a href="#" class="hover:text-blue-400">Visit Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Connect</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-facebook text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-700 text-center">
+                <p class="text-gray-400">
+                    &copy; 2026 Museum Booking System. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const qaContainer = document.getElementById('qaContainer');
+        const noResults = document.getElementById('noResults');
+        const qaItems = document.querySelectorAll('.qa-item');
+
+        // Search Q&A
+        function searchQA() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            
+            if (searchTerm === '') {
+                clearSearch();
+                return;
+            }
+
+            let hasResults = false;
+            
+            qaItems.forEach(item => {
+                const question = item.querySelector('h3').textContent.toLowerCase();
+                const answer = item.querySelector('p').textContent.toLowerCase();
+                
+                if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                    item.style.display = 'block';
+                    hasResults = true;
+                    
+                    // Highlight search term
+                    highlightSearchTerm(item, searchTerm);
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Show/hide no results message
+            if (hasResults) {
+                noResults.classList.add('hidden');
+                qaContainer.classList.remove('hidden');
+            } else {
+                noResults.classList.remove('hidden');
+                qaContainer.classList.add('hidden');
+            }
+        }
+
+        // Highlight search term
+        function highlightSearchTerm(element, searchTerm) {
+            // Remove existing highlights
+            element.innerHTML = element.innerHTML.replace(/<span class="search-highlight">([^<]+)<\/span>/g, '$1');
+            
+            // Add new highlights
+            if (searchTerm.length > 2) {
+                const regex = new RegExp(`(${searchTerm})`, 'gi');
+                element.innerHTML = element.innerHTML.replace(regex, '<span class="search-highlight">$1</span>');
+            }
+        }
+
+        // Filter by category
+        function filterCategory(category) {
+            // Clear search first
+            searchInput.value = '';
+            clearSearch();
+            
+            qaItems.forEach(item => {
+                if (category === 'all') {
+                    item.style.display = 'block';
+                } else {
+                    const itemCategory = item.getAttribute('data-category');
+                    if (itemCategory === category) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Hide no results message
+            noResults.classList.add('hidden');
+            qaContainer.classList.remove('hidden');
+        }
+
+        // Clear search
+        function clearSearch() {
+            searchInput.value = '';
+            qaItems.forEach(item => {
+                item.style.display = 'block';
+                // Remove highlights
+                item.innerHTML = item.innerHTML.replace(/<span class="search-highlight">([^<]+)<\/span>/g, '$1');
+            });
+            
+            noResults.classList.add('hidden');
+            qaContainer.classList.remove('hidden');
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                clearSearch();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show all items by default
+            filterCategory('all');
+        });
+    </script>
+</body>
+</html>

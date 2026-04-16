@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - Museum Ticket Booking System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .faq-item {
+            transition: all 0.3s ease;
+        }
+        .faq-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .search-highlight {
+            background-color: #fef3c7;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex items-center">
+                        <i class="fas fa-museum text-2xl text-blue-600 mr-3"></i>
+                        <span class="text-xl font-bold text-gray-800">Museum Booking</span>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="index.html" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                        <a href="login.html" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Login</a>
+                        <a href="faq.html" class="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">FAQ</a>
+                        <a href="register.html" class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700">Sign Up</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-4">
+                <i class="fas fa-question-circle text-4xl text-blue-600"></i>
+            </div>
+            <h1 class="text-4xl font-bold text-white mb-4">Frequently Asked Questions</h1>
+            <p class="text-xl text-blue-100 mb-8">Find answers to common questions about Museum Booking System</p>
+            
+            <!-- Search -->
+            <div class="max-w-2xl mx-auto mb-8">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Search FAQ..."
+                        class="w-full px-4 py-3 pr-12 rounded-lg border border-white border-opacity-20 bg-white bg-opacity-90 text-white placeholder-white placeholder-opacity-70 focus:ring-2 focus:ring-white focus:border-transparent"
+                        onkeyup="searchFAQ()"
+                    >
+                    <i class="fas fa-search absolute right-4 top-1/2 transform -translate-y-1/2 text-white opacity-70"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Categories -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <button onclick="filterCategory('all')" class="glass-effect p-4 rounded-lg hover:bg-white hover:bg-opacity-100 transition-all">
+                <i class="fas fa-globe text-2xl text-blue-600 mb-2"></i>
+                <h3 class="text-lg font-semibold text-gray-800">All Questions</h3>
+                <p class="text-gray-600 text-sm">View all FAQ items</p>
+            </button>
+            <button onclick="filterCategory('booking')" class="glass-effect p-4 rounded-lg hover:bg-white hover:bg-opacity-100 transition-all">
+                <i class="fas fa-ticket-alt text-2xl text-green-600 mb-2"></i>
+                <h3 class="text-lg font-semibold text-gray-800">Booking</h3>
+                <p class="text-gray-600 text-sm">Ticket booking questions</p>
+            </button>
+            <button onclick="filterCategory('payment')" class="glass-effect p-4 rounded-lg hover:bg-white hover:bg-opacity-100 transition-all">
+                <i class="fas fa-credit-card text-2xl text-purple-600 mb-2"></i>
+                <h3 class="text-lg font-semibold text-gray-800">Payment</h3>
+                <p class="text-gray-600 text-sm">Payment method questions</p>
+            </button>
+            <button onclick="filterCategory('account')" class="glass-effect p-4 rounded-lg hover:bg-white hover:bg-opacity-100 transition-all">
+                <i class="fas fa-user text-2xl text-orange-600 mb-2"></i>
+                <h3 class="text-lg font-semibold text-gray-800">Account</h3>
+                <p class="text-gray-600 text-sm">Account management</p>
+            </button>
+            <button onclick="filterCategory('technical')" class="glass-effect p-4 rounded-lg hover:bg-white hover:bg-opacity-100 transition-all">
+                <i class="fas fa-cog text-2xl text-red-600 mb-2"></i>
+                <h3 class="text-lg font-semibold text-gray-800">Technical</h3>
+                <p class="text-gray-600 text-sm">Technical support</p>
+            </button>
+            <button onclick="filterCategory('museum')" class="glass-effect p-4 rounded-lg hover:bg-white hover:bg-opacity-100 transition-all">
+                <i class="fas fa-building text-2xl text-indigo-600 mb-2"></i>
+                <h3 class="text-lg font-semibold text-gray-800">Museum Info</h3>
+                <p class="text-gray-600 text-sm">Museum information</p>
+            </button>
+        </div>
+
+        <!-- FAQ Items -->
+        <div id="faqContainer" class="space-y-6">
+            <!-- Booking Questions -->
+            <div class="faq-item glass-effect rounded-lg p-6" data-category="booking">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full">
+                            <i class="fas fa-ticket-alt text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">How do I book museum tickets?</h3>
+                        <p class="text-gray-600 mb-4">
+                            You can book museum tickets in multiple ways:<br><br>
+                            1. <strong>Manual Booking</strong>: Go to the Tickets page, select your preferred ticket type (Adult, Child, Senior, Family), choose your visit date and time, enter the number of tickets needed, and complete the payment.<br><br>
+                            2. <strong>Chatbot Booking</strong>: Click the chatbot button and say "I want to book tickets" or use the quick booking buttons for instant ticket selection.<br><br>
+                            3. <strong>Demo Accounts</strong>: Use demo accounts to test the system - Customer (customer@museum.com), Employee (employee@museum.com), or Manager (manager@museum.com).
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Booking</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item glass-effect rounded-lg p-6" data-category="booking">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full">
+                            <i class="fas fa-clock text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">What are the museum opening hours?</h3>
+                        <p class="text-gray-600 mb-4">
+                            The museum is open:<br><br>
+                            <strong>Regular Hours:</strong><br>
+                            Tuesday - Sunday: 9:00 AM - 6:00 PM<br>
+                            Monday: Closed<br><br>
+                            <strong>Last Entry:</strong><br>
+                            One hour before closing time (5:00 PM)<br><br>
+                            <strong>Special Hours:</strong><br>
+                            Holidays and special events may have different hours. Check the website or call ahead for specific dates.
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Museum Info</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item glass-effect rounded-lg p-6" data-category="booking">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-yellow-100 rounded-full">
+                            <i class="fas fa-calendar-times text-yellow-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Can I cancel my booking?</h3>
+                        <p class="text-gray-600 mb-4">
+                            Yes, you can cancel your museum booking with the following policies:<br><br>
+                            <strong>Free Cancellation:</strong><br>
+                            • Up to 24 hours before your visit date<br>
+                            • Full refund to original payment method<br><br>
+                            <strong>Partial Refund:</strong><br>
+                            • 2-24 hours before visit: 50% refund<br>
+                            • Less than 2 hours: No refund<br><br>
+                            <strong>How to Cancel:</strong><br>
+                            1. Go to "My Bookings" in your dashboard<br>
+                            2. Click "Cancel" next to your booking<br>
+                            3. Confirm cancellation<br>
+                            4. Refund processed automatically
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Booking</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Questions -->
+            <div class="faq-item glass-effect rounded-lg p-6" data-category="payment">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-full">
+                            <i class="fas fa-rupee-sign text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">What payment methods are accepted?</h3>
+                        <p class="text-gray-600 mb-4">
+                            We accept various payment methods for your convenience:<br><br>
+                            <strong>UPI Payment:</strong><br>
+                            • Google Pay (GPay) • PhonePe • Paytm<br>
+                            • Amazon Pay • BHIM • All major UPI apps<br>
+                            • Instant confirmation • No extra charges<br><br>
+                            <strong>Credit/Debit Cards:</strong><br>
+                            • Visa • Mastercard • RuPay • American Express<br>
+                            • 3D Secure verification • SSL encryption<br>
+                            • PCI DSS compliant • Fraud protection<br><br>
+                            <strong>Net Banking:</strong><br>
+                            • All major Indian banks (SBI, HDFC, ICICI, etc.)<br>
+                            • Secure banking login • Instant confirmation<br><br>
+                            <strong>Cash Payment:</strong><br>
+                            • Pay at museum entrance • Show booking confirmation<br>
+                            • Same-day payment available
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Payment</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item glass-effect rounded-lg p-6" data-category="payment">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full">
+                            <i class="fas fa-tag text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">What are the ticket prices?</h3>
+                        <p class="text-gray-600 mb-4">
+                            Museum ticket prices (in Indian Rupees):<br><br>
+                            <strong>Adult General Admission:</strong> ₹1,670.00<br>
+                            • Full day access to all exhibitions<br>
+                            • Free guide included<br>
+                            • Audio tour available<br><br>
+                            
+                            <strong>Child Ticket:</strong> ₹835.00<br>
+                            • For children under 12 years old<br>
+                            • All exhibitions access<br>
+                            • Free activities included<br><br>
+                            
+                            <strong>Senior Ticket:</strong> ₹1,252.50<br>
+                            • For visitors 65+ years old<br>
+                            • Priority entry<br>
+                            • Senior discount applied<br><br>
+                            
+                            <strong>Family Package:</strong> ₹4,175.00<br>
+                            • Up to 2 adults and 3 children<br>
+                            • Best value for families<br>
+                            • Free guide and parking included
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Pricing</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Questions -->
+            <div class="faq-item glass-effect rounded-lg p-6" data-category="account">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-orange-100 rounded-full">
+                            <i class="fas fa-user-plus text-orange-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">How do I create an account?</h3>
+                        <p class="text-gray-600 mb-4">
+                            Creating an account is simple and secure:<br><br>
+                            <strong>OTP Registration Process:</strong><br>
+                            1. Click "Sign up with OTP" on the login page<br>
+                            2. Choose contact method (Email, SMS, or WhatsApp)<br>
+                            3. Enter your email, phone number, or WhatsApp number<br>
+                            4. Click "Send OTP"<br>
+                            5. Enter the 6-digit OTP you receive<br>
+                            6. Fill in your details (Name, Email, Phone, Password)<br>
+                            7. Agree to terms and conditions<br>
+                            8. Click "Create Account"<br><br>
+                            <strong>Benefits:</strong><br>
+                            • Secure OTP verification via Email, SMS, or WhatsApp<br>
+                            • Save booking history<br>
+                            • Quick rebooking<br>
+                            • Special member offers
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Account</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item glass-effect rounded-lg p-6" data-category="account">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-red-100 rounded-full">
+                            <i class="fas fa-key text-red-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">I forgot my password. What should I do?</h3>
+                        <p class="text-gray-600 mb-4">
+                            If you forgot your password, follow these steps:<br><br>
+                            <strong>Password Reset Options:</strong><br>
+                            1. Go to the login page<br>
+                            2. Click "Forgot Password" link<br>
+                            3. Enter your registered email address<br>
+                            4. Check your email for reset instructions<br>
+                            5. Click the reset link in the email<br>
+                            6. Create a new password<br>
+                            7. Login with your new password<br><br>
+                            <strong>Security Tips:</strong><br>
+                            • Use a strong password (8+ characters)<br>
+                            • Include numbers and special characters<br>
+                            • Don't share your password<br>
+                            • Change passwords regularly<br>
+                            • Use different passwords for different sites
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Account</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item glass-effect rounded-lg p-6" data-category="account">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full">
+                            <i class="fab fa-whatsapp text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">How does WhatsApp login work?</h3>
+                        <p class="text-gray-600 mb-4">
+                            Our system uses WhatsApp for secure two-factor authentication during login:<br><br>
+                            <strong>WhatsApp Login Process:</strong><br>
+                            1. Enter your registered WhatsApp number<br>
+                            2. Enter your password<br>
+                            3. Select your role (Customer/Employee/Manager)<br>
+                            4. Click "Sign In"<br>
+                            5. Check your WhatsApp for the 6-digit OTP<br>
+                            6. Enter the OTP to complete login<br><br>
+                            <strong>WhatsApp OTP Features:</strong><br>
+                            • OTP expires in 10 minutes<br>
+                            • Resend option available after 30 seconds<br>
+                            • Secure and instant delivery<br>
+                            • Works on all devices with WhatsApp<br><br>
+                            <strong>Demo Accounts:</strong><br>
+                            • Customer: +1234567890 (password: customer123)<br>
+                            • Employee: +1987654321 (password: employee123)<br>
+                            • Manager: +1123456789 (password: manager123)
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Login</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical Questions -->
+            <div class="faq-item glass-effect rounded-lg p-6" data-category="technical">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-indigo-100 rounded-full">
+                            <i class="fas fa-mobile-alt text-indigo-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Is the system mobile-friendly?</h3>
+                        <p class="text-gray-600 mb-4">
+                            Yes! The Museum Booking System is fully mobile-friendly:<br><br>
+                            <strong>Mobile Features:</strong><br>
+                            • Responsive design for all screen sizes<br>
+                            • Touch-optimized interface<br>
+                            • Mobile navigation menu<br>
+                            • Easy booking on smartphones<br>
+                            • QR code tickets on mobile<br><br>
+                            <strong>Supported Devices:</strong><br>
+                            • All smartphones (iOS and Android)<br>
+                            • Tablets and iPads<br>
+                            • Mobile browsers (Chrome, Safari, etc.)<br>
+                            • No app download required<br><br>
+                            <strong>Mobile Benefits:</strong><br>
+                            • Book tickets anywhere, anytime<br>
+                            • Show QR codes at entrance<br>
+                            • Manage bookings on the go<br>
+                            • Same features as desktop
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Technical</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item glass-effect rounded-lg p-6" data-category="technical">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-pink-100 rounded-full">
+                            <i class="fas fa-wifi text-pink-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">What if I don't receive the OTP?</h3>
+                        <p class="text-gray-600 mb-4">
+                            If you don't receive the OTP, try these solutions:<br><br>
+                            <strong>Troubleshooting Steps:</strong><br>
+                            1. Check your email spam/junk folder<br>
+                            2. Verify your phone number is correct<br>
+                            3. Wait 2-3 minutes for delivery<br>
+                            4. Click "Resend OTP" if needed<br>
+                            5. Check internet connection<br>
+                            6. Try different contact method (email vs phone)<br><br>
+                            <strong>Common Issues:</strong><br>
+                            • Email provider blocking automated emails<br>
+                            • Phone number entered incorrectly<br>
+                            • Network delays in SMS delivery<br>
+                            • OTP expired (valid for 10 minutes)<br><br>
+                            <strong>Contact Support:</strong><br>
+                            If issues persist, contact our support team for assistance.
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Technical</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Museum Info Questions -->
+            <div class="faq-item glass-effect rounded-lg p-6" data-category="museum">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-teal-100 rounded-full">
+                            <i class="fas fa-map-marker-alt text-teal-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Where is the museum located?</h3>
+                        <p class="text-gray-600 mb-4">
+                            <strong>Museum Location:</strong><br>
+                            123 Museum Street, City Center<br>
+                            City, State 123456<br>
+                            India<br><br>
+                            <strong>Getting Here:</strong><br>
+                            • By Car: Free parking available on-site<br>
+                            • By Public Transport: Bus stop nearby<br>
+                            • By Metro: 5-minute walk from nearest station<br>
+                            • Ride-sharing: Uber/Ola drop-off point<br><br>
+                            <strong>Accessibility:</strong><br>
+                            • Wheelchair accessible entrances<br>
+                            • Elevators to all floors<br>
+                            • Accessible restrooms<br>
+                            • Special assistance available
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Museum Info</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item glass-effect rounded-lg p-6" data-category="museum">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-12 h-12 bg-cyan-100 rounded-full">
+                            <i class="fas fa-qrcode text-cyan-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">How do QR code tickets work?</h3>
+                        <p class="text-gray-600 mb-4">
+                            QR code tickets provide convenient entry to the museum:<br><br>
+                            <strong>How QR Tickets Work:</strong><br>
+                            1. Book your tickets online or through chatbot<br>
+                            2. Receive QR code via email and in dashboard<br>
+                            3. Save QR code to your phone or print it<br>
+                            4. Show QR code at museum entrance<br>
+                            5. Staff scans the code for validation<br>
+                            6. Receive entry - no physical ticket needed<br><br>
+                            <strong>Benefits of QR Tickets:</strong><br>
+                            • No need to print physical tickets<br>
+                            • Instant delivery to your email<br>
+                            • Environmentally friendly<br>
+                            • Can't lose your ticket<br>
+                            • Easy to share with friends<br>
+                            • Valid for selected date and time<br><br>
+                            <strong>Tips:</strong><br>
+                            • Save QR code to your phone's photo gallery<br>
+                            • Take screenshot as backup<br>
+                            • Ensure phone battery is charged when visiting<br>
+                            • Arrive 10 minutes before your time slot
+                        </p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>Museum Info</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Results Message -->
+        <div id="noResults" class="hidden text-center py-12">
+            <div class="glass-effect rounded-lg p-8 max-w-2xl mx-auto">
+                <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">No matching questions found</h3>
+                <p class="text-gray-500">Try different keywords or browse all categories above.</p>
+                <button onclick="clearSearch()" class="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                    Clear Search
+                </button>
+            </div>
+        </div>
+
+        <!-- Contact Support -->
+        <div class="text-center mt-12">
+            <div class="glass-effect rounded-lg p-8 max-w-2xl mx-auto">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Still Need Help?</h3>
+                <p class="text-gray-600 mb-6">
+                    Can't find the answer you're looking for? Our support team is here to help you with any questions about the Museum Booking System.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700">
+                        <i class="fas fa-phone mr-2"></i>
+                        Call Support
+                    </button>
+                    <button class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-envelope mr-2"></i>
+                        Email Support
+                    </button>
+                    <button class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700">
+                        <i class="fas fa-comments mr-2"></i>
+                        Live Chat
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="index.html" class="hover:text-blue-400">Home</a></li>
+                        <li><a href="login.html" class="hover:text-blue-400">Login</a></li>
+                        <li><a href="register.html" class="hover:text-blue-400">Register</a></li>
+                        <li><a href="customer-dashboard.html" class="hover:text-blue-400">Dashboard</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Support</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-blue-400">Help Center</a></li>
+                        <li><a href="#" class="hover:text-blue-400">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-blue-400">Live Chat</a></li>
+                        <li><a href="faq.html" class="hover:text-blue-400">FAQ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Museum Info</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-blue-400">About Us</a></li>
+                        <li><a href="#" class="hover:text-blue-400">Exhibitions</a></li>
+                        <li><a href="#" class="hover:text-blue-400">Events</a></li>
+                        <li><a href="#" class="hover:text-blue-400">Visit Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Connect</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-facebook text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-700 text-center">
+                <p class="text-gray-400">
+                    &copy; 2026 Museum Booking System. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const faqContainer = document.getElementById('faqContainer');
+        const noResults = document.getElementById('noResults');
+        const faqItems = document.querySelectorAll('.faq-item');
+
+        // Search FAQ
+        function searchFAQ() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            
+            if (searchTerm === '') {
+                clearSearch();
+                return;
+            }
+
+            let hasResults = false;
+            
+            faqItems.forEach(item => {
+                const question = item.querySelector('h3').textContent.toLowerCase();
+                const answer = item.querySelector('p').textContent.toLowerCase();
+                
+                if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                    item.style.display = 'block';
+                    hasResults = true;
+                    
+                    // Highlight search term
+                    highlightSearchTerm(item, searchTerm);
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Show/hide no results message
+            if (hasResults) {
+                noResults.classList.add('hidden');
+                faqContainer.classList.remove('hidden');
+            } else {
+                noResults.classList.remove('hidden');
+                faqContainer.classList.add('hidden');
+            }
+        }
+
+        // Highlight search term
+        function highlightSearchTerm(element, searchTerm) {
+            // Remove existing highlights
+            element.innerHTML = element.innerHTML.replace(/<span class="search-highlight">([^<]+)<\/span>/g, '$1');
+            
+            // Add new highlights
+            if (searchTerm.length > 2) {
+                const regex = new RegExp(`(${searchTerm})`, 'gi');
+                element.innerHTML = element.innerHTML.replace(regex, '<span class="search-highlight">$1</span>');
+            }
+        }
+
+        // Filter by category
+        function filterCategory(category) {
+            // Clear search first
+            searchInput.value = '';
+            clearSearch();
+            
+            faqItems.forEach(item => {
+                if (category === 'all') {
+                    item.style.display = 'block';
+                } else {
+                    const itemCategory = item.getAttribute('data-category');
+                    if (itemCategory === category) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Hide no results message
+            noResults.classList.add('hidden');
+            faqContainer.classList.remove('hidden');
+        }
+
+        // Clear search
+        function clearSearch() {
+            searchInput.value = '';
+            faqItems.forEach(item => {
+                item.style.display = 'block';
+                // Remove highlights
+                item.innerHTML = item.innerHTML.replace(/<span class="search-highlight">([^<]+)<\/span>/g, '$1');
+            });
+            
+            noResults.classList.add('hidden');
+            faqContainer.classList.remove('hidden');
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                clearSearch();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show all items by default
+            filterCategory('all');
+        });
+    </script>
+</body>
+</html>

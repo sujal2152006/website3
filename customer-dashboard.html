@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard - Museum Ticket Booking System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+        .ticket-card {
+            transition: all 0.3s ease;
+        }
+        .ticket-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .chatbot-bubble {
+            animation: bounce 2s infinite;
+        }
+        .chatbot-panel {
+            width: 24rem;
+            height: 32rem;
+            transition: width 0.2s ease, height 0.2s ease;
+        }
+        .chatbot-panel.maximized {
+            width: min(90vw, 42rem);
+            height: min(90vh, 72vh);
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Mobile Menu Toggle -->
+    <button id="mobileMenuToggle" class="md:hidden fixed top-4 left-4 z-50 bg-blue-600 text-white p-2 rounded-lg">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar w-64 bg-white shadow-lg fixed md:relative h-full z-40">
+            <div class="flex flex-col h-full">
+                <!-- Logo -->
+                <div class="flex items-center justify-center h-16 bg-blue-600">
+                    <i class="fas fa-museum text-white text-2xl"></i>
+                    <span class="ml-3 text-white font-bold">Museum Booking</span>
+                </div>
+                
+                <!-- User Info -->
+                <div class="p-4 border-b">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900" id="userName">Loading...</p>
+                            <p class="text-xs text-gray-500">Customer</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <nav class="flex-1 px-4 py-6 space-y-2">
+                    <a href="customer-dashboard.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-blue-50 text-blue-700">
+                        <i class="fas fa-home mr-3"></i>
+                        Dashboard
+                    </a>
+                    <a href="#" onclick="showBookingModal()" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-ticket-alt mr-3"></i>
+                        Book Tickets
+                    </a>
+                    <a href="#" onclick="showMyBookings()" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-calendar-check mr-3"></i>
+                        My Bookings
+                    </a>
+                    <a href="#" onclick="showProfile()" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-user-cog mr-3"></i>
+                        Profile
+                    </a>
+                </nav>
+                
+                <!-- Logout -->
+                <div class="p-4 border-t">
+                    <button onclick="logout()" class="w-full flex items-center px-4 py-2 text-sm font-medium rounded-lg text-red-600 hover:bg-red-50">
+                        <i class="fas fa-sign-out-alt mr-3"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 md:ml-64 overflow-y-auto">
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm">
+                <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-center justify-between">
+                        <h1 class="text-2xl font-bold text-gray-900">Customer Dashboard</h1>
+                        <div class="flex items-center space-x-4">
+                            <button onclick="toggleChatbot()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                <i class="fas fa-robot mr-2"></i>
+                                Chatbot
+                            </button>
+                            <button class="p-2 rounded-lg hover:bg-gray-100">
+                                <i class="fas fa-bell text-gray-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <!-- Welcome Section -->
+                <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 mb-8 text-white">
+                    <h2 class="text-2xl font-bold mb-2">Welcome back, <span id="welcomeName">Customer</span>!</h2>
+                    <p class="text-blue-100">Book your museum tickets and manage your bookings easily.</p>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <button onclick="showBookingModal()" class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow text-left">
+                        <i class="fas fa-ticket-alt text-blue-600 text-2xl mb-3"></i>
+                        <h4 class="text-lg font-semibold text-gray-900">Book New Ticket</h4>
+                        <p class="text-gray-600 text-sm">Browse available tickets and make new bookings</p>
+                    </button>
+                    <button onclick="showMyBookings()" class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow text-left">
+                        <i class="fas fa-calendar text-green-600 text-2xl mb-3"></i>
+                        <h4 class="text-lg font-semibold text-gray-900">My Bookings</h4>
+                        <p class="text-gray-600 text-sm">View and manage your existing bookings</p>
+                    </button>
+                    <button onclick="showChatbot()" class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow text-left">
+                        <i class="fas fa-robot text-purple-600 text-2xl mb-3"></i>
+                        <h4 class="text-lg font-semibold text-gray-900">AI Assistant</h4>
+                        <p class="text-gray-600 text-sm">Get help from our intelligent chatbot</p>
+                    </button>
+                </div>
+
+                <!-- Available Tickets -->
+                <div class="bg-white rounded-lg shadow p-6 mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-bold text-gray-900">Available Tickets</h3>
+                        <button onclick="refreshTickets()" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                            <i class="fas fa-sync-alt mr-1"></i>
+                            Refresh
+                        </button>
+                    </div>
+                    <div id="ticketsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Tickets will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- My Bookings Section -->
+                <div id="myBookingsSection" class="bg-white rounded-lg shadow p-6 hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-bold text-gray-900">My Bookings</h3>
+                        <button onclick="refreshBookings()" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                            <i class="fas fa-sync-alt mr-1"></i>
+                            Refresh
+                        </button>
+                    </div>
+                    <div id="bookingsList" class="space-y-4">
+                        <!-- Bookings will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-900">Book Ticket</h3>
+                <button onclick="closeBookingModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="bookingForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Ticket Type</label>
+                    <select id="ticketType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="adult">Adult - ₹1,670.00</option>
+                        <option value="child">Child - ₹835.00</option>
+                        <option value="senior">Senior - ₹1,252.50</option>
+                        <option value="family">Family - ₹4,175.00</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Visit Date</label>
+                    <input type="date" id="visitDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Number of Tickets</label>
+                    <input type="number" id="ticketCount" min="1" max="10" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Visit Time</label>
+                    <select id="visitTime" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="09:00">9:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="13:00">1:00 PM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                        <option value="17:00">5:00 PM</option>
+                    </select>
+                </div>
+                <div class="bg-blue-50 p-3 rounded-lg">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        All prices are displayed in Indian Rupees (₹)
+                    </p>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">
+                    <i class="fas fa-check mr-2"></i>
+                    Confirm Booking
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Booking Modal -->
+    <div id="editBookingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-900">Update Booking</h3>
+                <button onclick="closeEditBookingModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editBookingForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Visit Date</label>
+                    <input type="date" id="editVisitDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Visit Time</label>
+                    <select id="editVisitTime" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="09:00">9:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="13:00">1:00 PM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                        <option value="17:00">5:00 PM</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Number of Tickets</label>
+                    <input type="number" id="editTicketCount" min="1" max="10" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex justify-end space-x-3 mt-4">
+                    <button type="button" onclick="closeEditBookingModal()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Chatbot -->
+    <div id="chatbot" class="fixed bottom-4 right-4 hidden z-50">
+        <div id="chatbotPanel" class="bg-white rounded-lg shadow-2xl chatbot-panel flex flex-col">
+            <div class="bg-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <h3 class="font-semibold">Museum Assistant</h3>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="toggleChatbotSize()" class="text-white hover:text-gray-200" title="Toggle chat size">
+                        <i id="chatbotToggleSizeIcon" class="fas fa-expand"></i>
+                    </button>
+                    <button onclick="toggleChatbot()" class="text-white hover:text-gray-200" title="Close chat">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto">
+                <div class="text-gray-600 text-sm mb-4">
+                    🎫 Hello! I'm your museum booking assistant. I can help you:\n\n• Book tickets with chat commands\n• Choose payment methods\n• Get museum information\n• Manage your bookings\n\nTry saying "I want to book tickets" or ask about payment options!
+                </div>
+            </div>
+            <div class="p-4 border-t">
+                <!-- Quick Actions -->
+                <div class="mb-3">
+                    <p class="text-xs text-gray-600 mb-2">Quick Actions:</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="quickBook('adult')" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200">
+                            🎫 Book Adult
+                        </button>
+                        <button onclick="quickBook('child')" class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200">
+                            👶 Book Child
+                        </button>
+                        <button onclick="quickBook('senior')" class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded hover:bg-purple-200">
+                            👴 Book Senior
+                        </button>
+                        <button onclick="quickBook('family')" class="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded hover:bg-orange-200">
+                            👨‍👩‍👧 Book Family
+                        </button>
+                    </div>
+                </div>
+                <!-- Quick Payment -->
+                <div class="mb-3">
+                    <p class="text-xs text-gray-600 mb-2">Payment Help:</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="quickPayment('upi')" class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200">
+                            📱 UPI Payment
+                        </button>
+                        <button onclick="quickPayment('card')" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200">
+                            💳 Card Payment
+                        </button>
+                    </div>
+                </div>
+                <!-- Chat Input -->
+                <div class="flex space-x-2">
+                    <input type="text" id="chatInput" placeholder="Ask me about tickets, payment, or museum info..." class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <button onclick="sendMessage()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <button onclick="toggleChatbot()" class="chatbot-bubble bg-blue-600 text-white p-3 rounded-full shadow-lg">
+            <i class="fas fa-robot"></i>
+        </button>
+    </div>
+
+    <script>
+        // DOM Elements
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const userName = document.getElementById('userName');
+        const welcomeName = document.getElementById('welcomeName');
+        const ticketsGrid = document.getElementById('ticketsGrid');
+        const bookingsList = document.getElementById('bookingsList');
+        const myBookingsSection = document.getElementById('myBookingsSection');
+        const bookingModal = document.getElementById('bookingModal');
+        const editBookingModal = document.getElementById('editBookingModal');
+        const editBookingForm = document.getElementById('editBookingForm');
+        const chatbot = document.getElementById('chatbot');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+
+        let allBookings = [];
+        let myBookings = [];
+
+        // Sample data
+        const availableTickets = [
+            { id: 1, name: 'Adult General Admission', price: 20, type: 'adult', description: 'Full day access to all exhibitions' },
+            { id: 2, name: 'Child Ticket', price: 10, type: 'child', description: 'For children under 12' },
+            { id: 3, name: 'Senior Ticket', price: 15, type: 'senior', description: 'For visitors 65+' },
+            { id: 4, name: 'Family Package', price: 50, type: 'family', description: 'Up to 2 adults and 3 children' }
+        ];
+
+        // Currency configuration
+        const currency = {
+            symbol: '₹',
+            code: 'INR',
+            rate: 83.50 // 1 USD = 83.50 INR
+        };
+
+        // Initialize
+        window.addEventListener('load', function() {
+            checkAuth();
+            loadAllBookings();
+            updateUserInfo();
+            loadMyBookings();
+            loadTickets();
+        });
+
+        // Real-time updates when bookings change from other tabs/windows
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'museumBookings') {
+                loadAllBookings();
+                loadMyBookings();
+                if (myBookingsSection.classList.contains('hidden') === false) {
+                    displayBookings();
+                }
+            }
+        });
+
+        // Check authentication
+        function checkAuth() {
+            const user = localStorage.getItem('user');
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            
+            if (!user || !isLoggedIn) {
+                window.location.href = 'login.html';
+                return;
+            }
+        }
+
+        // Update user info
+        function updateUserInfo() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            userName.textContent = user.name || 'Customer';
+            welcomeName.textContent = user.name || 'Customer';
+        }
+
+        function getCurrentUser() {
+            return JSON.parse(localStorage.getItem('user') || '{}');
+        }
+
+        function loadAllBookings() {
+            const storedBookings = JSON.parse(localStorage.getItem('museumBookings') || 'null');
+            allBookings = Array.isArray(storedBookings) ? storedBookings : [];
+            if (!storedBookings) {
+                localStorage.setItem('museumBookings', JSON.stringify(allBookings));
+            }
+        }
+
+        function saveAllBookings() {
+            localStorage.setItem('museumBookings', JSON.stringify(allBookings));
+        }
+
+        function loadMyBookings() {
+            const user = getCurrentUser();
+            myBookings = allBookings.filter(booking => booking.customerEmail === user.email);
+        }
+
+        function generateBookingId() {
+            return 'BK' + Date.now();
+        }
+
+        // Mobile menu toggle
+        mobileMenuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('hidden');
+        });
+
+        // Load tickets
+        function loadTickets() {
+            ticketsGrid.innerHTML = availableTickets.map(ticket => {
+                const priceINR = ticket.price * currency.rate;
+                return `
+                <div class="ticket-card bg-white border rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-lg font-semibold text-gray-900">${ticket.name}</h4>
+                        <span class="text-2xl font-bold text-blue-600">${currency.symbol}${priceINR.toFixed(2)}</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">${ticket.description}</p>
+                    <button onclick="bookTicket(${ticket.id})" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-shopping-cart mr-2"></i>
+                        Book Now
+                    </button>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // Book ticket
+        function bookTicket(ticketId) {
+            const ticket = availableTickets.find(t => t.id === ticketId);
+            if (ticket) {
+                document.getElementById('ticketType').value = ticket.type;
+                showBookingModal();
+            }
+        }
+
+        // Show booking modal
+        function showBookingModal() {
+            bookingModal.classList.remove('hidden');
+            bookingModal.classList.add('flex');
+            
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('visitDate').min = today;
+        }
+
+        // Close booking modal
+        function closeBookingModal() {
+            bookingModal.classList.add('hidden');
+            bookingModal.classList.remove('flex');
+        }
+
+        // Handle booking form submission
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const ticketType = document.getElementById('ticketType').value;
+            const visitDate = document.getElementById('visitDate').value;
+            const ticketCount = document.getElementById('ticketCount').value;
+            const visitTime = document.getElementById('visitTime').value;
+            
+            const ticket = availableTickets.find(t => t.type === ticketType);
+            const totalPrice = ticket.price * ticketCount;
+            const totalPriceINR = totalPrice * currency.rate;
+            
+            const user = getCurrentUser();
+            const booking = {
+                id: generateBookingId(),
+                customerName: user.name || 'Guest',
+                customerEmail: user.email || 'guest@example.com',
+                phoneNumber: user.phoneNumber || '',
+                ticketName: ticket.name,
+                ticketType: ticketType,
+                visitDate: visitDate,
+                visitTime: visitTime,
+                ticketCount: parseInt(ticketCount, 10),
+                totalPrice: totalPrice,
+                totalPriceINR: totalPriceINR,
+                status: 'confirmed',
+                bookingDate: new Date().toISOString()
+            };
+            
+            allBookings.push(booking);
+            saveAllBookings();
+            loadMyBookings();
+            
+            // Record change
+            recordChange('booking', 'create', booking.id, 'New booking created');
+            
+            closeBookingModal();
+            showMyBookings();
+            
+            // Calculate per-person pricing
+            const perPersonPrice = totalPriceINR / ticketCount;
+            const perPersonPriceUSD = totalPrice / ticketCount;
+            
+            alert(`Booking confirmed!\n\n📋 **Booking Details:**\n• Ticket Type: ${ticket.name}\n• Number of Tickets: ${ticketCount}\n• Date: ${new Date(visitDate).toLocaleDateString()}\n• Time: ${visitTime}\n\n💰 **Pricing:**\n• Total Amount: ${currency.symbol}${totalPriceINR.toFixed(2)} (${currency.code})\n• Per Person: ${currency.symbol}${perPersonPrice.toFixed(2)} (${currency.code})\n• Per Person: $${perPersonPrice.toFixed(2)} USD\n\n✅ Your tickets have been booked successfully!`);
+        });
+
+        // Show my bookings
+        function showMyBookings() {
+            myBookingsSection.classList.remove('hidden');
+            displayBookings();
+            
+            // Scroll to bookings section
+            myBookingsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Display bookings
+        function displayBookings() {
+            if (myBookings.length === 0) {
+                bookingsList.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-calendar-times text-6xl text-gray-300 mb-4"></i>
+                        <h4 class="text-lg font-medium text-gray-600 mb-2">No bookings found</h4>
+                        <p class="text-gray-500">You haven't made any bookings yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            bookingsList.innerHTML = myBookings.map(booking => {
+                const totalPriceINR = booking.totalPriceINR || (booking.totalPrice * currency.rate);
+                
+                return `
+                    <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900">${booking.ticketName}</h4>
+                                <p class="text-sm text-gray-600">Booking ID: #${booking.id}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-2xl font-bold text-blue-600">${currency.symbol}${totalPriceINR.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    <i class="fas fa-check-circle mr-2"></i>
+                                    ${booking.status}
+                                </span>
+                                <span class="text-sm text-gray-600">
+                                    <i class="fas fa-calendar mr-2"></i>
+                                    ${new Date(booking.visitDate).toLocaleDateString()}
+                                </span>
+                                <span class="text-sm text-gray-600">
+                                    <i class="fas fa-clock mr-2"></i>
+                                    ${booking.visitTime}
+                                </span>
+                                <span class="text-sm text-gray-600">
+                                    <i class="fas fa-ticket-alt mr-2"></i>
+                                    ${booking.ticketCount} tickets
+                                </span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="editBooking('${booking.id}')" class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-200">
+                                    <i class="fas fa-edit mr-1"></i>
+                                    Edit
+                                </button>
+                                <button onclick="cancelBooking('${booking.id}')" class="bg-red-100 text-red-700 px-3 py-1 rounded text-sm hover:bg-red-200">
+                                    <i class="fas fa-times mr-1"></i>
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Cancel booking
+        function cancelBooking(bookingId) {
+            if (confirm('Are you sure you want to cancel this booking?')) {
+                // Record change
+                recordChange('booking', 'delete', bookingId, 'Booking cancelled by customer');
+                
+                // Remove from allBookings array
+                allBookings = allBookings.filter(b => b.id !== bookingId);
+                saveAllBookings();
+                loadMyBookings();
+                displayBookings();
+                alert('Booking cancelled successfully.');
+            }
+        }
+
+        // Edit booking
+        function editBooking(bookingId) {
+            const booking = myBookings.find(b => b.id === bookingId);
+            if (booking) {
+                document.getElementById('editVisitDate').value = booking.visitDate;
+                document.getElementById('editVisitTime').value = booking.visitTime;
+                document.getElementById('editTicketCount').value = booking.ticketCount;
+                
+                // Store current booking ID for update
+                editBookingForm.dataset.bookingId = bookingId;
+                
+                editBookingModal.classList.remove('hidden');
+                editBookingModal.classList.add('flex');
+            }
+        }
+
+        // Close edit booking modal
+        function closeEditBookingModal() {
+            editBookingModal.classList.add('hidden');
+            editBookingModal.classList.remove('flex');
+        }
+
+        // Handle edit booking form submission
+        editBookingForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const bookingId = this.dataset.bookingId;
+            const newVisitDate = document.getElementById('editVisitDate').value;
+            const newVisitTime = document.getElementById('editVisitTime').value;
+            const newTicketCount = parseInt(document.getElementById('editTicketCount').value);
+            
+            // Find the booking in allBookings
+            const bookingIndex = allBookings.findIndex(b => b.id === bookingId);
+            if (bookingIndex !== -1) {
+                const booking = allBookings[bookingIndex];
+                const ticket = availableTickets.find(t => t.type === booking.ticketType);
+                
+                // Recalculate price based on new ticket count
+                const newTotalPrice = ticket.price * newTicketCount;
+                const newTotalPriceINR = newTotalPrice * currency.rate;
+                
+                // Update booking
+                booking.visitDate = newVisitDate;
+                booking.visitTime = newVisitTime;
+                booking.ticketCount = newTicketCount;
+                booking.totalPrice = newTotalPrice;
+                booking.totalPriceINR = newTotalPriceINR;
+                
+                saveAllBookings();
+                loadMyBookings();
+                displayBookings();
+                closeEditBookingModal();
+                
+                // Record change
+                recordChange('booking', 'update', bookingId, 'Booking updated by customer');
+                
+                alert('Booking updated successfully!');
+            }
+        });
+
+        // Toggle chatbot
+        function toggleChatbot() {
+            chatbot.classList.toggle('hidden');
+        }
+
+        // Toggle chatbot size
+        function toggleChatbotSize() {
+            const chatbotPanel = document.getElementById('chatbotPanel');
+            const icon = document.getElementById('chatbotToggleSizeIcon');
+            chatbotPanel.classList.toggle('maximized');
+            if (chatbotPanel.classList.contains('maximized')) {
+                icon.className = 'fas fa-compress';
+            } else {
+                icon.className = 'fas fa-expand';
+            }
+        }
+
+        // Quick booking function
+        function quickBook(ticketType) {
+            // Add user message for quick booking
+            const userMessage = document.createElement('div');
+            userMessage.className = 'mb-2';
+            userMessage.innerHTML = `
+                <div class="flex justify-end">
+                    <div class="bg-blue-600 text-white p-2 rounded-lg max-w-xs">
+                        I want to book ${ticketType} tickets
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(userMessage);
+
+            // Get bot response
+            setTimeout(() => {
+                const botMessage = document.createElement('div');
+                botMessage.className = 'mb-2';
+                botMessage.innerHTML = `
+                    <div class="flex justify-start">
+                        <div class="bg-gray-200 text-gray-800 p-2 rounded-lg max-w-xs">
+                            ${getBotResponse(`I want to book ${ticketType} tickets`)}
+                        </div>
+                    </div>
+                `;
+                chatMessages.appendChild(botMessage);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Auto-fill booking form
+                setTimeout(() => {
+                    showBookingModal();
+                    document.getElementById('ticketType').value = ticketType;
+                }, 2000);
+            }, 1000);
+        }
+
+        // Quick payment function
+        function quickPayment(paymentType) {
+            // Add user message for payment help
+            const userMessage = document.createElement('div');
+            userMessage.className = 'mb-2';
+            userMessage.innerHTML = `
+                <div class="flex justify-end">
+                    <div class="bg-blue-600 text-white p-2 rounded-lg max-w-xs">
+                        I want to pay with ${paymentType}
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(userMessage);
+
+            // Get bot response
+            setTimeout(() => {
+                const botMessage = document.createElement('div');
+                botMessage.className = 'mb-2';
+                botMessage.innerHTML = `
+                    <div class="flex justify-start">
+                        <div class="bg-gray-200 text-gray-800 p-2 rounded-lg max-w-xs">
+                            ${getBotResponse(`I want to pay with ${paymentType}`)}
+                        </div>
+                    </div>
+                `;
+                chatMessages.appendChild(botMessage);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 1000);
+        }
+
+        // Send message to chatbot
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'mb-2';
+            userMessage.innerHTML = `
+                <div class="flex justify-end">
+                    <div class="bg-blue-600 text-white p-2 rounded-lg max-w-xs">
+                        ${message}
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(userMessage);
+
+            // Clear input
+            chatInput.value = '';
+
+            // Simulate bot response
+            setTimeout(() => {
+                const botMessage = document.createElement('div');
+                botMessage.className = 'mb-2';
+                botMessage.innerHTML = `
+                    <div class="flex justify-start">
+                        <div class="bg-gray-200 text-gray-800 p-2 rounded-lg max-w-xs">
+                            ${getBotResponse(message)}
+                        </div>
+                    </div>
+                `;
+                chatMessages.appendChild(botMessage);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 1000);
+        }
+
+        // Get bot response
+        function getBotResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('book') || lowerMessage.includes('ticket') || lowerMessage.includes('reserve')) {
+                return `I can help you book a museum ticket! Please provide:\n\n🎫 **Ticket Type**: Adult (₹1,670.00), Child (₹835.00), Senior (₹1,252.50), Family (₹4,175.00)\n📅 **Visit Date**: What date would you like to visit?\n⏰ **Visit Time**: What time works for you? (9:00 AM - 5:00 PM)\n👥 **Number of Tickets**: How many tickets do you need?\n\nType: "I want to book [ticket type] for [number] people on [date] at [time]"`;
+            } else if (lowerMessage.includes('adult') || lowerMessage.includes('₹1670') || lowerMessage.includes('₹1,670')) {
+                return `Great choice! Adult General Admission tickets give you full day access to all exhibitions.\n\n💰 **Price**: ₹1,670.00 per ticket\n🎯 **Includes**: All exhibitions, Free guide, Audio tour\n\nTo book, tell me:\n• How many tickets?\n• What date?\n• What time?`;
+            } else if (lowerMessage.includes('child') || lowerMessage.includes('₹835') || lowerMessage.includes('₹835.00')) {
+                return `Perfect! Child tickets are for children under 12 years old.\n\n💰 **Price**: ₹835.00 per ticket\n🎯 **Includes**: All exhibitions, Free activities, Kid-friendly guide\n\nTo book, tell me:\n• How many child tickets?\n• What date?\n• What time?`;
+            } else if (lowerMessage.includes('senior') || lowerMessage.includes('₹1252') || lowerMessage.includes('₹1,252')) {
+                return `Excellent! Senior tickets are for visitors 65+ years old.\n\n💰 **Price**: ₹1,252.50 per ticket\n🎯 **Includes**: All exhibitions, Priority entry, Senior discount\n\nTo book, tell me:\n• How many senior tickets?\n• What date?\n• What time?`;
+            } else if (lowerMessage.includes('family') || lowerMessage.includes('₹4175') || lowerMessage.includes('₹4,175')) {
+                return `Wonderful! Family Package is our best value.\n\n💰 **Price**: ₹4,175.00 total\n🎯 **Includes**: Up to 2 adults and 3 children, Group discount, Free guide, Free parking\n\nTo book, tell me:\n• What date?\n• What time?`;
+            } else if (lowerMessage.includes('pay') || lowerMessage.includes('payment') || lowerMessage.includes('money')) {
+                return `Payment options for your museum tickets:\n\n💳 **Credit/Debit Card**\n• Visa, Mastercard, RuPay\n• Secure online payment\n• Instant confirmation\n\n📱 **UPI Payment**\n• Google Pay, PhonePe, Paytm\n• Scan QR code or UPI ID\n• Instant confirmation\n\n🏦 **Net Banking**\n• All major Indian banks\n• Secure transfer\n• Instant confirmation\n\n💰 **Cash on Counter**\n• Pay at museum entrance\n• Show booking confirmation\n• Same-day payment\n\n📧 **Wallet Payment**\n• Paytm Wallet, PhonePe Wallet\n• Amazon Pay, MobiKwik\n• Instant confirmation\n\nWhich payment method would you prefer?`;
+            } else if (lowerMessage.includes('upi') || lowerMessage.includes('gpay') || lowerMessage.includes('phonepe')) {
+                return `UPI Payment is quick and easy!\n\n📱 **UPI Options**:\n• Google Pay (GPay)\n• PhonePe\n• Paytm\n• Amazon Pay\n• BHIM\n\n🔢 **How to Pay**:\n1. Select UPI as payment method\n2. Enter your UPI ID\n3. Verify amount\n4. Approve payment on your phone\n5. Get instant confirmation\n\n💡 **Benefits**:\n• No extra charges\n• Instant booking confirmation\n• QR code sent immediately\n• Safe and secure\n\nReady to proceed with UPI payment?`;
+            } else if (lowerMessage.includes('card') || lowerMessage.includes('credit') || lowerMessage.includes('debit')) {
+                return `Card payment is secure and convenient!\n\n💳 **Accepted Cards**:\n• Visa\n• Mastercard\n• RuPay\n• American Express\n\n🔒 **Security Features**:\n• 3D Secure verification\n• SSL encryption\n• PCI DSS compliant\n• Fraud protection\n\n📧 **Process**:\n1. Enter card details\n2. Billing address\n3. CVV verification\n4. OTP confirmation\n5. Instant booking confirmation\n\nReady to proceed with card payment?`;
+            } else if (lowerMessage.includes('confirm') || lowerMessage.includes('done') || lowerMessage.includes('ready')) {
+                return `Perfect! Let's confirm your booking details:\n\n📋 **Booking Summary**:\n• Date: [Selected Date]\n• Time: [Selected Time]\n• Tickets: [Number and Type]\n• Total: [Total Amount in ₹]\n• Payment: [Selected Method]\n\n✅ **Next Steps**:\n1. Click "Confirm Booking"\n2. Complete payment\n3. Receive QR code ticket\n4. Show QR code at museum entrance\n\nWould you like me to guide you to the payment page?`;
+            } else if (lowerMessage.includes('time') || lowerMessage.includes('hours') || lowerMessage.includes('open')) {
+                return `Museum Hours and Information:\n\n🕘 **Opening Hours**:\n• Tuesday - Sunday: 9:00 AM - 6:00 PM\n• Monday: Closed\n\n🎫 **Ticket Prices**:\n• Adult: ₹2,087.50\n• Child: ₹1,252.50\n• Senior: ₹1,670.00\n• Family: ₹6,680.00\n\n📍 **Location**:\n• 123 Museum Street, City\n• Free parking available\n• Wheelchair accessible\n\nNeed help with anything else?`;
+            } else if (lowerMessage.includes('cancel') || lowerMessage.includes('refund')) {
+                return `Booking Cancellation Policy:\n\n❌ **Cancellation Rules**:\n• Free cancellation up to 24 hours before visit\n• 50% refund for cancellations 2-24 hours before\n• No refund for cancellations less than 2 hours before\n\n🔄 **How to Cancel**:\n1. Go to "My Bookings"\n2. Click "Cancel" on your booking\n3. Confirm cancellation\n4. Refund processed to original payment method\n\nNeed help with a specific booking?`;
+            } else if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('help')) {
+                return `👋 Hello! Welcome to Museum Booking Assistant!\n\nI can help you with:\n\n🎫 **Book Tickets**: "I want to book adult tickets"\n💰 **Payment Options**: "What payment methods are available?"\n📅 **Museum Info**: "What are the opening hours?"\n❌ **Cancel Booking**: "How do I cancel my booking?"\n📞 **Contact Support**: "I need to speak to a person"\n\nWhat would you like to do today?`;
+            } else {
+                return `I can help you with museum ticket booking! Here are some options:\n\n🎫 **Book Tickets**: "I want to book [ticket type]"\n💳 **Payment Help**: "payment options"\n📅 **Museum Info**: "opening hours"\n❌ **Cancel Booking**: "how to cancel"\n📞 **Human Support**: "speak to person"\n\nWhat would you like assistance with?`;
+            }
+        }
+
+        // Refresh tickets
+        function refreshTickets() {
+            loadTickets();
+        }
+
+        // Refresh bookings
+        function refreshBookings() {
+            myBookings = JSON.parse(localStorage.getItem('myBookings') || '[]');
+            displayBookings();
+        }
+
+        // Show profile
+        function showProfile() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            alert(`Profile Information:\n\nName: ${user.name}\nEmail: ${user.email}\nRole: ${user.role}`);
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('isLoggedIn');
+            window.location.href = 'login.html';
+        }
+
+        // Record change event
+        function recordChange(entityType, action, entityId, description) {
+            const changeHistory = JSON.parse(localStorage.getItem('changeHistory') || '[]');
+            const changeEvent = {
+                entityType: entityType,
+                action: action,
+                entityId: entityId,
+                description: description,
+                timestamp: new Date().toISOString(),
+                user: JSON.parse(localStorage.getItem('user') || '{}').name || 'Unknown'
+            };
+            changeHistory.push(changeEvent);
+            localStorage.setItem('changeHistory', JSON.stringify(changeHistory));
+        }
+
+        // Handle chat input enter key
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

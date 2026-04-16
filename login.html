@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Museum Ticket Booking System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Toggle Switch Styles */
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: #3b82f6;
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <!-- Background Elements -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-10 left-10 w-20 h-20 bg-white opacity-5 rounded-full animate-float"></div>
+        <div class="absolute top-20 right-20 w-32 h-32 bg-white opacity-5 rounded-full animate-float" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-20 left-20 w-24 h-24 bg-white opacity-5 rounded-full animate-float" style="animation-delay: 4s;"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="relative z-10 w-full max-w-md">
+        <!-- Login Card -->
+        <div class="glass-effect rounded-2xl shadow-2xl p-8">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4">
+                    <i class="fas fa-museum text-white text-3xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Museum Login</h1>
+                <p class="text-gray-600">Sign in to your account</p>
+            </div>
+
+            <!-- Role Selection -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select Your Role</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <label class="relative">
+                        <input type="radio" name="role" value="customer" checked class="peer">
+                        <div class="absolute inset-0 bg-white border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all">
+                            <div class="flex flex-col items-center justify-center p-3">
+                                <i class="fas fa-user text-blue-600 mb-1"></i>
+                                <span class="text-xs font-medium">Customer</span>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="relative">
+                        <input type="radio" name="role" value="employee" class="peer">
+                        <div class="absolute inset-0 bg-white border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all">
+                            <div class="flex flex-col items-center justify-center p-3">
+                                <i class="fas fa-id-badge text-blue-600 mb-1"></i>
+                                <span class="text-xs font-medium">Employee</span>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="relative">
+                        <input type="radio" name="role" value="manager" class="peer">
+                        <div class="absolute inset-0 bg-white border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all">
+                            <div class="flex flex-col items-center justify-center p-3">
+                                <i class="fas fa-user-tie text-blue-600 mb-1"></i>
+                                <span class="text-xs font-medium">Manager</span>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="space-y-6">
+                <!-- Login Field (Email or ID) -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-user mr-2 text-green-600"></i>Email Address or ID
+                    </label>
+                    <input
+                        type="text"
+                        id="loginIdentifier"
+                        name="loginIdentifier"
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                        placeholder="Enter your email or ID (e.g., customer@museum.com or CUST001)"
+                        autocomplete="username"
+                    >
+                    <p class="text-xs text-gray-500 mt-1">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Enter your email address or employee/manager ID
+                    </p>
+                </div>
+
+                <!-- Password Field -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-lock mr-2"></i>Password
+                    </label>
+                    <div class="relative">
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            required
+                            class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                        >
+                        <button
+                            type="button"
+                            id="togglePassword"
+                            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                        >
+                            <i class="fas fa-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Login Button -->
+                <button 
+                    type="submit" 
+                    id="loginBtn"
+                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                    <span id="btnText">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Sign In
+                    </span>
+                    <div id="btnLoading" class="loading-spinner mx-auto hidden"></div>
+                </button>
+            </form>
+
+            <!-- Success Message -->
+            <div id="successMessage" class="hidden mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 mr-3 text-xl"></i>
+                    <div>
+                        <h4 class="text-green-800 font-semibold">Success!</h4>
+                        <p class="text-green-700 text-sm" id="successDetails">Redirecting to dashboard...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="hidden mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-red-500 mr-3 text-xl"></i>
+                    <div>
+                        <h4 class="text-red-800 font-semibold">Login Failed</h4>
+                        <p class="text-red-700 text-sm" id="errorDetails"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Register Link -->
+            <div class="text-center mt-6">
+                <p class="text-gray-600">
+                    Don't have an account?
+                    <a href="register.html" class="text-blue-600 hover:text-blue-800 font-semibold transition-colors">
+                        Sign up
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const loginForm = document.getElementById('loginForm');
+        const loginIdentifierInput = document.getElementById('loginIdentifier');
+        const passwordInput = document.getElementById('password');
+        const togglePasswordBtn = document.getElementById('togglePassword');
+        const eyeIcon = document.getElementById('eyeIcon');
+        const demoAccountToggle = document.getElementById('demoAccountToggle');
+        const loginCredentialsSection = document.getElementById('loginCredentialsSection');
+
+        // Password visibility toggle
+        togglePasswordBtn.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            eyeIcon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+        });
+
+        // Handle form submission
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const role = document.querySelector('input[name="role"]:checked').value;
+            const loginIdentifier = loginIdentifierInput.value.trim();
+            const password = passwordInput.value;
+
+            // Basic validation
+            if (!loginIdentifier || !password) {
+                showError('Please enter both email/ID and password');
+                return;
+            }
+
+            // Validate format (email or ID)
+            if (!isValidEmail(loginIdentifier) && !isValidID(loginIdentifier)) {
+                showError('Please enter a valid email address or ID');
+                return;
+            }
+
+            showLoading();
+
+            // Simulate API call for credential verification
+            setTimeout(() => {
+                // Check for registered users first (priority for customer accounts)
+                const registeredCredentials = JSON.parse(localStorage.getItem('registeredCredentials') || '{}');
+                const managedEmployees = JSON.parse(localStorage.getItem('managedEmployees') || '[]');
+                
+                // Static credentials - support both email and ID (for demo accounts and managed employees)
+                const validCredentials = {
+                    // Email-based credentials (demo accounts)
+                    'employee@museum.com': { password: 'employee123', role: 'employee', name: 'Jane Employee', email: 'employee@museum.com', id: 'EMP001' },
+                    'manager@museum.com': { password: 'manager123', role: 'manager', name: 'Mike Manager', email: 'manager@museum.com', id: 'MGR001' },
+                    // ID-based credentials (demo accounts)
+                    'EMP001': { password: 'employee123', role: 'employee', name: 'Jane Employee', email: 'employee@museum.com', id: 'EMP001' },
+                    'MGR001': { password: 'manager123', role: 'manager', name: 'Mike Manager', email: 'manager@museum.com', id: 'MGR001' }
+                };
+
+                managedEmployees.forEach(employee => {
+                    if (employee.id) {
+                        validCredentials[employee.id.toUpperCase()] = {
+                            password: employee.password,
+                            role: 'employee',
+                            name: employee.name || 'Employee',
+                            email: employee.email || '',
+                            id: employee.id.toUpperCase()
+                        };
+                    }
+                    if (employee.email) {
+                        validCredentials[employee.email.toLowerCase()] = {
+                            password: employee.password,
+                            role: 'employee',
+                            name: employee.name || 'Employee',
+                            email: employee.email.toLowerCase(),
+                            id: employee.id.toUpperCase()
+                        };
+                    }
+                });
+
+                const normalizedIdentifier = loginIdentifier.toLowerCase();
+                const normalizedCredentials = Object.entries(validCredentials).reduce((acc, [key, value]) => {
+                    acc[key.toLowerCase()] = value;
+                    return acc;
+                }, {});
+
+                // For customer role, prioritize registered users over demo accounts
+                let foundCredentials = null;
+                
+                if (role === 'customer') {
+                    // First check registered users
+                    if (registeredCredentials[loginIdentifier]) {
+                        foundCredentials = registeredCredentials[loginIdentifier];
+                    }
+                    // If no registered user found, don't allow demo customer login
+                    if (!foundCredentials) {
+                        hideLoading();
+                        showError('No customer account found. Please register first or use employee/manager demo accounts.');
+                        return;
+                    }
+                } else {
+                    // For employee and manager roles, check both registered and demo accounts
+                    if (registeredCredentials[loginIdentifier]) {
+                        foundCredentials = registeredCredentials[loginIdentifier];
+                    } else if (normalizedCredentials[normalizedIdentifier]) {
+                        foundCredentials = normalizedCredentials[normalizedIdentifier];
+                    }
+                }
+
+                if (foundCredentials && foundCredentials.password === password && foundCredentials.role === role) {
+                    const userData = {
+                        email: isValidEmail(loginIdentifier) ? loginIdentifier : foundCredentials.email || `${loginIdentifier.toLowerCase()}@museum.com`,
+                        role: foundCredentials.role,
+                        name: foundCredentials.name,
+                        id: foundCredentials.id || loginIdentifier.toUpperCase(),
+                        loginTime: new Date().toISOString()
+                    };
+
+                    // Record login event
+                    recordLoginEvent(userData.id, userData.email, userData.role);
+
+                    localStorage.setItem('user', JSON.stringify(userData));
+                    localStorage.setItem('isLoggedIn', 'true');
+
+                    hideLoading();
+                    showSuccess('Login successful! Redirecting...');
+
+                    setTimeout(() => {
+                        if (userData.role === 'customer') {
+                            window.location.href = 'customer-dashboard.html';
+                        } else if (userData.role === 'employee') {
+                            window.location.href = 'employee-dashboard.html';
+                        } else if (userData.role === 'manager') {
+                            window.location.href = 'manager-dashboard.html';
+                        }
+                    }, 1200);
+                } else {
+                    hideLoading();
+                    if (role === 'customer') {
+                        showError('Invalid customer credentials. Please register for a customer account or check your email/password.');
+                    } else {
+                        showError('Invalid email/ID, password, or role. Please use demo credentials shown below.');
+                    }
+                }
+            }, 1500);
+        });
+
+        function showLoading() {
+            loginBtn.disabled = true;
+            btnText.classList.add('hidden');
+            btnLoading.classList.remove('hidden');
+            loginBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        }
+
+        function hideLoading() {
+            loginBtn.disabled = false;
+            btnText.classList.remove('hidden');
+            btnLoading.classList.add('hidden');
+            loginBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+        }
+
+        function showSuccess(message) {
+            successMessage.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+            
+            // Update success message text
+            const successText = document.getElementById('successDetails');
+            if (successText) {
+                successText.textContent = message;
+            }
+        }
+
+        function showError(message) {
+            errorDetails.textContent = message;
+            errorMessage.classList.remove('hidden');
+            successMessage.classList.add('hidden');
+        }
+
+        function isValidEmail(email) {
+            // Basic email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function isValidID(id) {
+            // Basic ID validation - allows alphanumeric, 3-10 characters
+            return /^[A-Z0-9]{3,10}$/i.test(id);
+        }
+
+        // Record login event
+        function recordLoginEvent(userId, email, role) {
+            const loginHistory = JSON.parse(localStorage.getItem('loginHistory') || '[]');
+            const loginEvent = {
+                userId: userId,
+                email: email,
+                role: role,
+                timestamp: new Date().toISOString(),
+                action: 'login'
+            };
+            loginHistory.push(loginEvent);
+            localStorage.setItem('loginHistory', JSON.stringify(loginHistory));
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                loginForm.dispatchEvent(new Event('submit'));
+            }
+            if (e.key === 'Escape') {
+                loginIdentifierInput.value = '';
+                passwordInput.value = '';
+                errorMessage.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
