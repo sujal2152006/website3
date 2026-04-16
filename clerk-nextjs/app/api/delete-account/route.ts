@@ -2,7 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import { clerkClient } from '@clerk/clerk-sdk-node';
 
 export async function POST() {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   if (!userId) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
